@@ -7,7 +7,7 @@ import Foundation
 public struct URLSessionRequestServer: URLRequestServer {
     let session: URLSession
 
-    public func callAsFunction(_ request: URLRequest) async -> URLResult {
+    public func performRequest(_ request: URLRequest) async -> URLResult {
         let task = Task { try await session.data(for: request) }
         return await task.result.map { ($0, $1) }
     }

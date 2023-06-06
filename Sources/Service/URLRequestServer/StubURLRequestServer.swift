@@ -13,7 +13,7 @@ public final class StubURLRequestServer: URLRequestServer {
         self.missingStubError = missingStubError
     }
 
-    public func callAsFunction(_ request: URLRequest) async -> URLResult {
+    public func performRequest(_ request: URLRequest) async -> URLResult {
         guard let url = request.url else { return missingStubResult }
         return stubs[url] ?? missingStubResult
     }

@@ -12,7 +12,7 @@ public final class MockURLRequestServer: URLRequestServer {
         self.stubResult = stubResult
     }
 
-    public func callAsFunction(_ request: URLRequest) async -> URLResult {
+    public func performRequest(_ request: URLRequest) async -> URLResult {
         spyRequest = request
         return stubResult
     }

@@ -29,7 +29,7 @@ extension GreetingServiceDefinition: URLRequestServiceDefinition {
                 .appending(path: input)
 
             let request = URLRequest(url: url)
-            let result = await urlServer(request)
+            let result = await urlServer.performRequest(request)
 
             return Result {
                 let (data, _) = try result.get()

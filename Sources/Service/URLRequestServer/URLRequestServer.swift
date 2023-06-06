@@ -6,7 +6,7 @@ import Foundation
 /// ``URLRequestServer`` is a thing able to provide a response to a ``URLRequest``
 ///
 public protocol URLRequestServer {
-    func callAsFunction(_ request: URLRequest) async -> URLResult
+    func performRequest(_ request: URLRequest) async -> URLResult
     typealias URLResult = Result<(data: Data, urlResponse: URLResponse), Error>
 }
 
