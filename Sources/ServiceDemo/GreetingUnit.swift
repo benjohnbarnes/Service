@@ -1,3 +1,6 @@
+import Foundation
+import Service
+
 /// An example unit making use of ``GreetingServiceDefinition``. It chooses to make use of it by having an
 /// ``AsyncService`` dependency.
 ///
@@ -8,16 +11,16 @@
 /// to begin prototyping a service an actual implementation approach such as HTTP is not necessary, let alone
 /// the details of any implementation.
 ///
-final class GreetingUnit: ObservableObject {
+public final class GreetingUnit: ObservableObject {
 
     let greetingService: any AsyncService<GreetingServiceDefinition>
-    @Published var isLoading: Bool = false
+    @Published public var isLoading: Bool = false
 
-    internal init(greetingService: any AsyncService<GreetingServiceDefinition>) {
+    public init(greetingService: any AsyncService<GreetingServiceDefinition>) {
         self.greetingService = greetingService
     }
 
-    func getGreeting(person: String) async throws -> String {
+    public func getGreeting(person: String) async throws -> String {
         isLoading = true
         defer { isLoading = false }
 

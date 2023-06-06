@@ -42,19 +42,3 @@ final class GreetingUnitTests: XCTestCase {
     }
 }
 
-// MARK: - Extend example service with URL implementation
-
-/// Now `GreetingService`` can be extended to implement ``URLRequestServiceDefinition``.
-///
-extension GreetingServiceDefinition: URLRequestServiceDefinition {
-
-    public typealias Context = Void
-
-    public static func createService(inContext context: Context, usingServer urlServer: URLRequestServer) -> Service {
-        /// Need to flesh this out showing how ``Context`` is useful and show that it is testable.
-        var request = URLRequest(url: URL(string: "Hello")!)
-        request.url = URL(string: "Hey")!
-        fatalError()
-    }
-}
-

@@ -5,6 +5,11 @@ import PackageDescription
 
 let package = Package(
     name: "Service",
+    platforms: [
+        .iOS(.v14),
+        .macOS(.v13),
+        .watchOS(.v6)
+    ],
     products: [
         // Products define the executables and libraries a package produces, and make them visible to other packages.
         .library(
@@ -23,6 +28,15 @@ let package = Package(
             dependencies: []),
         .testTarget(
             name: "ServiceTests",
-            dependencies: ["Service"]),
+            dependencies: ["Service"]
+        ),
+        .target(
+            name: "ServiceDemo",
+            dependencies: ["Service"]
+        ),
+        .testTarget(
+            name: "ServiceDemoTests",
+            dependencies: ["ServiceDemo"]
+        ),
     ]
 )

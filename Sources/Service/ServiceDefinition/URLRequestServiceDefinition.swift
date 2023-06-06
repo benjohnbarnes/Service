@@ -18,7 +18,7 @@ public protocol URLRequestServiceDefinition: ServiceDefinition {
 
     /// Create an instance of this service.
     ///
-    static func createService(inContext context: Context, usingServer urlServer: URLRequestServer) -> Service
-    typealias Service = (Input) async -> Output
+    static func createService(inContext context: Context, usingServer urlServer: URLRequestServer) -> ServiceImplementation
+    typealias ServiceImplementation = (Input) async -> Output
 }
 

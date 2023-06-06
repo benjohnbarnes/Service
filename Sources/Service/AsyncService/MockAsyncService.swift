@@ -1,20 +1,21 @@
-// MARK: - Testing example unit with `MockAsyncService`
-
-/// ``MockAsyncService`` is a test double of ``AsyncService`` to test units depending on them.
+/// ``MockAsyncService`` provides a test double for testing units depending on an ``AsyncService``.
 ///
 public final class MockAsyncService<Definition: ServiceDefinition>: AsyncService {
 
     /// Capture the input the unit was called with.
-    var spyInput: Definition.Input?
+    ///
+    public var spyInput: Definition.Input?
 
     /// Called after service invocation but before service completion. Supports validation of unit
     /// state during service calls. Eg – that they have transitioned in to a loading state.
-    var validationHook: (() async -> Void)?
+    ///
+    public var validationHook: (() async -> Void)?
 
     /// The result the service will provide.
-    var stubOutput: Definition.Output
+    ///
+    public var stubOutput: Definition.Output
 
-    internal init(stubOutput: Definition.Output) {
+    public init(stubOutput: Definition.Output) {
         self.stubOutput = stubOutput
     }
 
