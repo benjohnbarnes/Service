@@ -1,10 +1,3 @@
-//
-//  GreetingUnitTests.swift
-//  
-//
-//  Created by Benjohn on 06/06/2023.
-//
-
 import XCTest
 import Service
 import ServiceDemo

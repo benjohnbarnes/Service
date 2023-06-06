@@ -1,4 +1,4 @@
-
+import Foundation
 import XCTest
 import Service
 import ServiceDemo
@@ -6,11 +6,34 @@ import ServiceDemo
 final class GreetingServiceDefinitionTests: XCTestCase {
 
     let mockServer = MockURLRequestServer()
+    lazy var subject = GreetingServiceDefinition.createService(inContext: .test, usingServer: mockServer)
 
     func test_requestHasCorrectURL() async throws {
-        let service = GreetingServiceDefinition.createService(inContext: Void(), usingServer: mockServer)
-        _ = await service("hello")
-        XCTAssertEqual(mockServer.spyRequest?.url, URL(string: "hello"))
+        _ = await subject("hello")
+        XCTAssertEqual(mockServer.spyRequest?.url, URL(string: "example.com/greeting/hello"))
     }
+
+    func test_requestHasCorrectMethod() async throws {
+        _ = await subject("hello")
+        XCTAssertEqual(mockServer.spyRequest?.httpMethod, "GET")
+    }
+
+    func test_requestHasCorrectHeaders() async throws {
+        _ = await subject("hello")
+        XCTAssertNil(mockServer.spyRequest?.allHTTPHeaderFields)
+    }
+
+    func test_parsesResponseData() async throws {
+        let data = try XCTUnwrap("greet".data(using: .utf8))
+        mockServer.stubResult = .success((data, URLResponse()))
+        let result = await subject("hello")
+        XCTAssertEqual(try result.get(), "greet")
+    }
+}
+
+// MARK: -
+
+private extension GreetingServicesContext {
+    static let test = GreetingServicesContext(baseURL: URL(string: "example.com")!)
 }
 

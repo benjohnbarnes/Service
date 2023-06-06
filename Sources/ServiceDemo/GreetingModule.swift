@@ -5,7 +5,7 @@ import Service
 ///
 public struct GreetingModule {
 
-    let serviceFactory: URLRequestServiceFactory<Void>
+    let serviceFactory: URLRequestServiceFactory<GreetingServicesContext>
 
     /// In general we'd be creating far more complex graphs of feature units in a module, but this is a
     /// super trivial example that I think shows this is viable.

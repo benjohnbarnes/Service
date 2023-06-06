@@ -13,11 +13,11 @@ public final class MockURLRequestServer: URLRequestServer {
     }
 
     public func callAsFunction(_ request: URLRequest) async -> URLResult {
-        stubResult
+        spyRequest = request
+        return stubResult
     }
 
     public struct NoResultDefined: Error {
         public init() {}
     }
 }
-
