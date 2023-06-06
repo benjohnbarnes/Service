@@ -44,9 +44,9 @@ final class GreetingUnitTests: XCTestCase {
 
 // MARK: - Extend example service with URL implementation
 
-/// Now `GreetingService`` can be extended to implement ``URLServerServiceDefinition``.
+/// Now `GreetingService`` can be extended to implement ``URLRequestServiceDefinition``.
 ///
-extension GreetingServiceDefinition: URLServerServiceDefinition {
+extension GreetingServiceDefinition: URLRequestServiceDefinition {
 
     public typealias Context = Void
 

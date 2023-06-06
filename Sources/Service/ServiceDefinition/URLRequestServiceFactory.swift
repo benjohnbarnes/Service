@@ -5,16 +5,16 @@
 /// a module either with a mock factory (to test the integrated module with stub services), or with a real
 /// factory so it can be constructed to use real end points.
 ///
-public struct URLServerServiceFactory<Context> {
+public struct URLRequestServiceFactory<Context> {
 
     let context: Context
     let urlServer: any URLRequestServer
 
-    func makeService<Definition: URLServerServiceDefinition>() -> Service<Definition> where Definition.Context == Context {
+    func makeService<Definition: URLRequestServiceDefinition>() -> Service<Definition> where Definition.Context == Context {
         Service<Definition>(implementation: Definition.createService(inContext: context, usingServer: urlServer))
     }
 
-    struct Service<Definition: URLServerServiceDefinition>: AsyncService {
+    struct Service<Definition: URLRequestServiceDefinition>: AsyncService {
         let implementation: Definition.Service
 
         func callAsFunction(_ input: Definition.Input) async -> Definition.Output {

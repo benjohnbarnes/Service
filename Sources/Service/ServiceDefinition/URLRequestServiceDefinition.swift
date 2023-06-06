@@ -1,9 +1,9 @@
-/// ``URLServerServiceDefinition`` extends ``ServiceDefinition`` by requiring it provide an implementation
+/// ``URLRequestServiceDefinition`` extends ``ServiceDefinition`` requiring it provide an implementation
 /// approach. A ``ServiceDefinition`` could use some other approach to providing an implementation, and
 /// potentially, a ``ServiceDefinition`` could provide several implementation approaches. But here's one
 /// that makes use of ``URLRequest``s.
 ///
-public protocol URLServerServiceDefinition: ServiceDefinition {
+public protocol URLRequestServiceDefinition: ServiceDefinition {
 
     /// Contextual details this service requires so as to construct a ``URLRequest`` or parse its response.
     /// It is expected all service definitions from a module (and related module families) would share a

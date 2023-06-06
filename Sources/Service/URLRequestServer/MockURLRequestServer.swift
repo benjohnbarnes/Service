@@ -1,7 +1,7 @@
 // MARK: - Testing example URL service with `MockURLRequestServer`
 
 /// ``MockURLRequestServer`` implements ``URLServer`` as a test double. It provides for testing of
-/// ``URLServerServiceDefinition`` services.
+/// ``URLRequestServiceDefinition`` services.
 ///
 public final class MockURLRequestServer: URLRequestServer {
 
