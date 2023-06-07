@@ -1,7 +1,8 @@
 import Foundation
 
-/// ``MockURLRequestServer`` implements ``URLServer`` as a test double. It provides for testing of
-/// ``URLRequestServiceDefinition`` services.
+/// ``MockURLRequestServer`` implements ``URLServer`` as a test double.
+///
+/// Use ``MockURLRequestServer`` to test service definitions conforming to ``URLRequestServiceDefinition``.
 ///
 public final class MockURLRequestServer: URLRequestServer {
 
@@ -17,7 +18,7 @@ public final class MockURLRequestServer: URLRequestServer {
         return stubResult
     }
 
-    public struct NoResultDefined: Error {
+    public struct NoResultDefined: Error, Equatable {
         public init() {}
     }
 }
