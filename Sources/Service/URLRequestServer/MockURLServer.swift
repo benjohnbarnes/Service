@@ -1,15 +1,15 @@
 import Foundation
 
-/// ``MockURLRequestServer`` implements ``URLServer`` as a test double.
+/// `MockURLServer` implements `URLServer` as a test double.
 ///
-/// Use ``MockURLRequestServer`` to test service definitions conforming to ``URLRequestServiceDefinition``.
+/// Use `MockURLServer` to test service definitions conforming to `URLServiceDefinition`.
 ///
-public final class MockURLRequestServer: URLRequestServer {
+public final class MockURLServer: URLServer {
 
     public var spyRequest: URLRequest?
     public var stubResult: URLResult
 
-    public init(stubResult: MockURLRequestServer.URLResult = .failure(NoResultDefined())) {
+    public init(stubResult: MockURLServer.URLResult = .failure(NoResultDefined())) {
         self.stubResult = stubResult
     }
 

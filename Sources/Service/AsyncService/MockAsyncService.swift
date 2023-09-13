@@ -1,4 +1,9 @@
+import Foundation
+
 /// ``MockAsyncService`` provides a test double for testing units depending on an ``AsyncService``.
+///
+/// `Definition` need only be a `ServiceDefinition`, so `MockAsyncService` can be created to test
+/// units before the `Definition` has an implementation approach.
 ///
 public final class MockAsyncService<Definition: ServiceDefinition>: AsyncService {
 
@@ -6,8 +11,9 @@ public final class MockAsyncService<Definition: ServiceDefinition>: AsyncService
     ///
     public var spyInput: Definition.Input?
 
-    /// Called after service invocation but before service completion. Supports validation of unit
-    /// state during service calls. Eg – that they have transitioned in to a loading state.
+    /// Called after after each service invocation, but before service completion. Use this
+    /// to assert unit state during their service calls. Eg – that a unit is in the loading
+    /// state during a service call.
     ///
     public var validationHook: (() async -> Void)?
 
@@ -25,4 +31,3 @@ public final class MockAsyncService<Definition: ServiceDefinition>: AsyncService
         return stubOutput
     }
 }
-

@@ -17,11 +17,11 @@ public enum GreetingServiceDefinition: ServiceDefinition {
 
 /// Now `GreetingService`` can be extended to implement ``URLRequestServiceDefinition``.
 ///
-extension GreetingServiceDefinition: URLRequestServiceDefinition {
+extension GreetingServiceDefinition: URLServiceDefinition {
 
     public typealias Context = GreetingServicesContext
 
-    public static func createService(inContext context: GreetingServicesContext, usingServer urlServer: URLRequestServer) -> ServiceImplementation {
+    public static func implementation(in context: GreetingServicesContext, using urlServer: URLServer) -> AsyncImplementation {
         { input in
             /// Need to flesh this out showing how ``Context`` is useful and show that it is testable.
             let url = context.baseURL
