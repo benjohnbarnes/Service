@@ -25,14 +25,3 @@ public protocol AsyncService<Definition> {
     func callAsFunction(_ input: Definition.Input) async -> Definition.Output
 }
 
-// MARK: -
-
-extension ServiceDefinition {
-
-    /// An async func providing an implementation of this `ServiceDefinition`.
-    ///
-    /// Note that this type is provided on all `ServiceDefinition` allowing `MockAsyncService`
-    /// to be built for any `ServiceDefinition`, even before it provides some mechanism to obtain
-    /// an async implementation.
-    public typealias AsyncImplementation = (Input) async -> Output
-}

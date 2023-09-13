@@ -24,7 +24,18 @@ public protocol URLServiceDefinition: ServiceDefinition {
 
 // MARK: -
 
-/// `URLServer` provides a `URLResult` for a `URLRequest`. 
+extension ServiceDefinition {
+    /// An async func providing an implementation of this `ServiceDefinition`.
+    ///
+    /// Note that this type is provided on all `ServiceDefinition` allowing `MockAsyncService`
+    /// to be built for any `ServiceDefinition`, even before it provides some mechanism to obtain
+    /// an async implementation.
+    public typealias AsyncImplementation = (Input) async -> Output
+}
+
+// MARK: -
+
+/// `URLServer` provides a `URLResult` for a `URLRequest`.
 ///
 public protocol URLServer {
     func performRequest(_ request: URLRequest) async -> URLResult
