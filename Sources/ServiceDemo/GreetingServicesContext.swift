@@ -1,6 +1,6 @@
 import Foundation
 
-/// An example `Context` for a ``URLRequestServiceDefinition`` as used for ``GreetingService``. Merely holds
+/// An example `Context` for a ``URLServiceDefinition`` as used for ``GreetingService``. Merely holds
 /// a base URL for the services in this module. This allows for environments to be easily replaced.
 /// 
 public struct GreetingServicesContext {

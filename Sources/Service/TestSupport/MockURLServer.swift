@@ -2,7 +2,7 @@ import Foundation
 
 /// `MockURLServer` implements `URLServer` as a test double.
 ///
-/// Use `MockURLServer` to test service definitions conforming to `URLServiceDefinition`.
+/// Use `MockURLServer` to test `URLServiceDefinition` implementations.
 ///
 public final class MockURLServer: URLServer {
 

@@ -1,5 +1,7 @@
 import Foundation
 
+/// Give your module a `URLSessionServiceFactory` to build real production services.
+///
 /// `URLSessionServiceFactory` implements `URLServiceFactory`, building service instances that
 /// perform calls using a `Foundation.URLSession`.
 ///
