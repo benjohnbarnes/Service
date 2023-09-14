@@ -21,7 +21,7 @@ extension GreetingServiceDefinition: URLServiceDefinition {
 
     public typealias Context = GreetingServicesContext
 
-    public static func implementation(in context: GreetingServicesContext, using urlServer: URLServer) -> AsyncImplementation {
+    public static func implementation(in context: GreetingServicesContext, using urlServer: URLRequesting) -> AsyncImplementation {
         { input in
             /// Need to flesh this out showing how ``Context`` is useful and show that it is testable.
             let url = context.baseURL

@@ -1,7 +1,7 @@
 import Foundation
 
 /// `URLServiceDefinition` extends `ServiceDefinition` to provide an implementation
-/// utilising a `URLServer` instance.
+/// utilising a `URLRequesting` instance.
 ///
 /// It's expected that most services are likely to conform to `URLServiceDefinition`. However,
 /// prior to an implementation being available a service definition may only conform to
@@ -29,9 +29,9 @@ public protocol URLServiceDefinition: ServiceDefinition {
     associatedtype Context
 
     /// Create an implementation of this service within some `Context` performing the request against a
-    /// `URLServer`.
+    /// `URLRequesting`.
     ///
-    static func implementation(in context: Context, using urlServer: URLServer) -> AsyncImplementation
+    static func implementation(in context: Context, using urlServer: URLRequesting) -> AsyncImplementation
 }
 
 // MARK: -
@@ -55,7 +55,7 @@ extension ServiceDefinition {
 /// `URLServer` provides a `URLResult` for a `URLRequest`.
 ///
 ///
-public protocol URLServer {
+public protocol URLRequesting {
     func performRequest(_ request: URLRequest) async -> URLResult
     typealias URLResult = Result<(data: Data, urlResponse: URLResponse), Error>
 }

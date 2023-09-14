@@ -39,7 +39,7 @@ extension URLSessionServiceFactory: URLServiceFactory {
         }
     }
 
-    private struct Server: URLServer {
+    private struct Server: URLRequesting {
         public let session: URLSession
 
         public func performRequest(_ request: URLRequest) async -> URLResult {

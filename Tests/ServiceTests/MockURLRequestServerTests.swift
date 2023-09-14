@@ -3,7 +3,7 @@ import Service
 
 final class MockURLRequestServerTests: XCTestCase {
 
-    let subject = MockURLServer()
+    let subject = MockURLRequesting()
 
     func test_spyRequest_givenServiceNotInvoked_thenIsNil() async throws {
         XCTAssertNil(subject.spyRequest)
@@ -17,7 +17,7 @@ final class MockURLRequestServerTests: XCTestCase {
     func test_stubResult_givenInitialState_whenServiceInvoked_thenServiceResultIsError() async throws {
         let result = await subject.performRequest(.test)
         XCTAssertThrowsError(try result.get()) { error in
-            XCTAssertNotNil(error as? MockURLServer.NoResultDefined)
+            XCTAssertNotNil(error as? MockURLRequesting.NoResultDefined)
         }
     }
 
