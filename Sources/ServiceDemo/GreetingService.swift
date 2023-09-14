@@ -8,7 +8,6 @@ import Service
 /// to how a client consumes it.
 ///
 public enum GreetingServiceDefinition: ServiceDefinition {
-
     public typealias Input = String
     public typealias Output = Result<String, Error>
 }
