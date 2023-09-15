@@ -12,8 +12,8 @@ import ServiceDemo
 ///
 final class GreetingUnitTests: XCTestCase {
 
-    let mockService = MockAsyncService<GreetingServiceDefinition>(stubOutput: .success("Hey there!"))
-    lazy var subject = GreetingUnit(greetingService: mockService)
+    let mockService = MockService<GreetingService>(stubOutput: .success("Hey there!"))
+    lazy var subject = GreetingUnit(greetingService: mockService.service)
 
     func test_getGreeting_callsServiceWithPerson() async throws {
         _ = try await subject.getGreeting(person: "test-person")

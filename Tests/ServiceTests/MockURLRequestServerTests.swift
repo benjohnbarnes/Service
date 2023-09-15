@@ -1,9 +1,9 @@
 import XCTest
 import Service
 
-final class MockURLRequestServerTests: XCTestCase {
+final class MockServiceBuilderTests: XCTestCase {
 
-    let subject = MockURLRequesting()
+    let subject = MockServiceBuilder(context: UUID.test)
 
     func test_spyRequest_givenServiceNotInvoked_thenIsNil() async throws {
         XCTAssertNil(subject.spyRequest)
@@ -17,7 +17,7 @@ final class MockURLRequestServerTests: XCTestCase {
     func test_stubResult_givenInitialState_whenServiceInvoked_thenServiceResultIsError() async throws {
         let result = await subject.performRequest(.test)
         XCTAssertThrowsError(try result.get()) { error in
-            XCTAssertNotNil(error as? MockURLRequesting.NoResultDefined)
+            XCTAssertNotNil(error as? MockServiceBuilder<UUID>.UndefinedResponse)
         }
     }
 
@@ -48,4 +48,8 @@ private extension Data {
 
 private extension URLResponse {
     static let test = URLResponse(url: .test, mimeType: nil, expectedContentLength: 321, textEncodingName: nil)
+}
+
+private extension UUID {
+    static let test = UUID()
 }

@@ -5,7 +5,7 @@ import Foundation
 /// `Definition` need only be a `ServiceDefinition`, so `MockAsyncService` can be created to test
 /// units before the `Definition` has an implementation approach.
 ///
-public final class MockAsyncService<Definition: ServiceDefinition>: AsyncService {
+public final class MockService<Definition: ServiceDefinition> {
 
     /// Capture the input the unit was called with.
     ///
@@ -25,9 +25,11 @@ public final class MockAsyncService<Definition: ServiceDefinition>: AsyncService
         self.stubOutput = stubOutput
     }
 
-    public func callAsFunction(_ input: Definition.Input) async -> Definition.Output {
-        spyInput = input
-        await validationHook?()
-        return stubOutput
+    public var service: Service<Definition> {
+        Service { input in
+            self.spyInput = input
+            await self.validationHook?()
+            return self.stubOutput
+        }
     }
 }

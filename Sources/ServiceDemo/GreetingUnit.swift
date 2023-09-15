@@ -13,10 +13,10 @@ import Service
 ///
 public final class GreetingUnit: ObservableObject {
 
-    let greetingService: any AsyncService<GreetingServiceDefinition>
+    let greetingService: Service<GreetingService>
     @Published public var isLoading: Bool = false
 
-    public init(greetingService: any AsyncService<GreetingServiceDefinition>) {
+    public init(greetingService: Service<GreetingService>) {
         self.greetingService = greetingService
     }
 
