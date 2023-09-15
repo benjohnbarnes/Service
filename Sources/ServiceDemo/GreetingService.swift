@@ -18,8 +18,8 @@ public enum GreetingService: ServiceDefinition {
 ///
 public extension Service<GreetingService> {
 
-    static func service(using builder: some ServiceBuilder<GreetingServicesContext>) -> Self {
-        builder.buildService { context, requesting in
+    static func service(using builder: some URLServiceBuilder<GreetingServicesContext>) -> Self {
+        builder.buildService { context, performRequest in
             { input in
                 /// Need to flesh this out showing how ``Context`` is useful and show that it is testable.
                 let url = context.baseURL
@@ -27,7 +27,7 @@ public extension Service<GreetingService> {
                     .appending(path: input)
 
                 let request = URLRequest(url: url)
-                let result = await requesting.performRequest(request)
+                let result = await performRequest(request)
 
                 return Result {
                     let (data, _) = try result.get()

@@ -1,4 +1,5 @@
-// Types that represent services by describing their `Input` and `Output` domain types.
+/// Types that represent services by describing their `Input` and `Output` domain types.
+///
 public protocol ServiceDefinition {
 
     /// The domain type this service consumes.

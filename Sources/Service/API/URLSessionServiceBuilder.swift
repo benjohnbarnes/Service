@@ -1,26 +1,25 @@
 import Foundation
 
-public struct URLSessionServiceBuilder<Context> {
+/// Implementation of `URLServiceBuilder` intended for production use that
+/// will build services calling a `URLSession` instance.
+///
+public struct URLSessionServiceBuilder<Context>: URLServiceBuilder {
 
     let context: Context
     let session: URLSession
 
-    public init(context: Context, session: URLSession) {
+    public init(context: Context, session: URLSession = .shared) {
         self.context = context
         self.session = session
     }
 
-    public func buildService<Definition: ServiceDefinition>(
-        _ serviceFunction: (Context, any URLRequesting) -> Definition.Implementation
-    ) -> Service<Definition> {
-        return Service(implementation: serviceFunction(context, self))
+    public func buildService<D: ServiceDefinition>(
+        _ serviceFunction: (Context, @escaping PerformURLRequest) -> D.Implementation
+    ) -> Service<D> {
+        return Service(implementation: serviceFunction(context, perform(request:)))
     }
-}
 
-// MARK: -
-
-extension URLSessionServiceBuilder: URLRequesting {
-    public func performRequest(_ request: URLRequest) async -> URLResult {
+    private func perform(request: URLRequest) async -> URLResult {
         do {
             let (data, response) = try await session.data(for: request)
             return .success((data: data, urlResponse: response))
@@ -30,3 +29,4 @@ extension URLSessionServiceBuilder: URLRequesting {
         }
     }
 }
+
