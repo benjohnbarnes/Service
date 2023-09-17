@@ -12,7 +12,7 @@ import ServiceDemo
 ///
 final class GreetingUnitTests: XCTestCase {
 
-    let mockService = MockService<GreetingService>(stubOutput: .success("Hey there!"))
+    let mockService = GreetingService.Mock(stubOutput: .success("Hey there!"))
     lazy var subject = GreetingUnit(greetingService: mockService.service)
 
     func test_getGreeting_callsServiceWithPerson() async throws {

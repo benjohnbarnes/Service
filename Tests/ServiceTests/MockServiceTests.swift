@@ -3,12 +3,7 @@ import Service
 
 final class MockServiceTests: XCTestCase {
 
-    private enum TestServiceDefinition: ServiceDefinition {
-        typealias Input = String
-        typealias Output = Int
-    }
-
-    private let subject = MockService<TestServiceDefinition>(stubOutput: 10)
+    private let subject = Service<String, Int>.Mock(stubOutput: 10)
 
     func test_spyInput_givenSubjectUncalled_thenIsNil() async {
         XCTAssertEqual(subject.spyInput, nil)

@@ -5,8 +5,8 @@ import ServiceDemo
 
 final class GreetingServiceDefinitionTests: XCTestCase {
 
-    let mockBuilder = MockURLServiceBuilder<GreetingServicesContext>(context: .test)
-    lazy var subject: Service<GreetingService> = .service(using: mockBuilder)
+    let mockBuilder = MockURLServiceProvider<GreetingServicesContext>(context: .test)
+    lazy var subject: GreetingService = .service(using: mockBuilder)
 
     func test_requestHasCorrectURL() async throws {
         _ = await subject("hello")

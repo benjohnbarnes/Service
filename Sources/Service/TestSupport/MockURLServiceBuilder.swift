@@ -1,14 +1,15 @@
 import Foundation
 
-public final class MockURLServiceBuilder<Context>: URLServiceBuilder {
+public final class MockURLServiceProvider<Context>: URLServiceProviding {
 
-    var context: Context
-
-    /// A stub result to provide to the calling subject.
-    public var stubResult: URLResult
+    /// The `Context` shared by services created from this builder.
+    public var context: Context
 
     /// Any most recent request made by the test subject.
     public var spyRequest: URLRequest?
+
+    /// A stub result to provide to the calling subject.
+    public var stubResult: URLResult
 
     public convenience init(context: Context) {
         self.init(context: context, stubResult: .failure(UndefinedURLResponse()))
@@ -19,13 +20,7 @@ public final class MockURLServiceBuilder<Context>: URLServiceBuilder {
         self.stubResult = stubResult
     }
 
-    public func buildService<D: ServiceDefinition>(
-        _ serviceFunction: (Context, @escaping PerformURLRequest) -> D.Implementation
-    ) -> Service<D>  {
-        return Service(implementation: serviceFunction(context, perform(request:)))
-    }
-
-    func perform(request: URLRequest) async -> URLResult {
+    public func perform(request: URLRequest) async -> URLResult {
         spyRequest = request
         return stubResult
     }

@@ -13,10 +13,10 @@ import Service
 ///
 public final class GreetingUnit: ObservableObject {
 
-    let greetingService: Service<GreetingService>
+    let greetingService: GreetingService
     @Published public var isLoading: Bool = false
 
-    public init(greetingService: Service<GreetingService>) {
+    public init(greetingService: GreetingService) {
         self.greetingService = greetingService
     }
 

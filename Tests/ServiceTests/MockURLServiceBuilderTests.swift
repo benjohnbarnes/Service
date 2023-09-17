@@ -3,7 +3,7 @@ import XCTest
 
 final class MockURLServiceBuilderTests: XCTestCase {
 
-    let subject = MockURLServiceBuilder(context: UUID.test)
+    let subject = MockURLServiceProvider(context: UUID.test)
 
     func test_spyRequest_givenServiceNotInvoked_thenIsNil() async throws {
         XCTAssertNil(subject.spyRequest)
@@ -53,9 +53,4 @@ private extension URLResponse {
 
 private extension UUID {
     static let test = UUID()
-}
-
-private enum DummyService: ServiceDefinition {
-    typealias Input = URLRequest
-    typealias Output = URLResult
 }
