@@ -5,27 +5,27 @@ import ServiceDemo
 
 final class GreetingServiceDefinitionTests: XCTestCase {
 
-    let mockBuilder = MockURLServiceProvider<GreetingServicesContext>(context: .test)
-    lazy var subject: GreetingService = .service(using: mockBuilder)
+    let mockProvider = URLServiceProvider<GreetingServicesContext>.Mock(context: .test)
+    lazy var subject: GreetingService = .greeting(using: mockProvider)
 
     func test_requestHasCorrectURL() async throws {
         _ = await subject("hello")
-        XCTAssertEqual(mockBuilder.spyRequest?.url, URL(string: "example.com/greeting/hello"))
+        XCTAssertEqual(mockProvider.spyRequest?.url, URL(string: "example.com/greeting/hello"))
     }
 
     func test_requestHasCorrectMethod() async throws {
         _ = await subject("hello")
-        XCTAssertEqual(mockBuilder.spyRequest?.httpMethod, "GET")
+        XCTAssertEqual(mockProvider.spyRequest?.httpMethod, "GET")
     }
 
     func test_requestHasCorrectHeaders() async throws {
         _ = await subject("hello")
-        XCTAssertNil(mockBuilder.spyRequest?.allHTTPHeaderFields)
+        XCTAssertNil(mockProvider.spyRequest?.allHTTPHeaderFields)
     }
 
     func test_parsesResponseData() async throws {
         let data = try XCTUnwrap("greet".data(using: .utf8))
-        mockBuilder.stubResult = .success((data, URLResponse()))
+        mockProvider.stubResult = .success((data, URLResponse()))
         let result = await subject("hello")
         XCTAssertEqual(try result.get(), "greet")
     }

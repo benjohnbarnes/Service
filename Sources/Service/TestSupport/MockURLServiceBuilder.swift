@@ -1,5 +1,11 @@
 import Foundation
 
+public extension URLServiceProviding {
+    typealias Mock = MockURLServiceProvider<Context>
+}
+
+// MARK: -
+
 public final class MockURLServiceProvider<Context>: URLServiceProviding {
 
     /// The `Context` shared by services created from this builder.

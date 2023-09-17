@@ -15,6 +15,6 @@ public struct GreetingModule {
     ///
     func greetingFeature() -> GreetingUnit {
         // Build the unit, providing it with a service instance built by the factory.
-        GreetingUnit(greetingService: .service(using: serviceBuilder))
+        GreetingUnit(greetingService: .greeting(using: serviceBuilder))
     }
 }

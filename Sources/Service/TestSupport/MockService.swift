@@ -1,8 +1,10 @@
 import Foundation
 
-extension Servicing {
-    public typealias Mock = MockService<Input, Output>
+public extension Servicing {
+    typealias Mock = MockService<Input, Output>
 }
+
+// MARK: -
 
 /// ``MockAsyncService`` provides a test double for testing units depending on an ``AsyncService``.
 ///

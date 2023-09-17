@@ -6,21 +6,18 @@ I'll try to justify these tall claims as you read on!
 
 # What does Service provide?
 
-Service is a Swift package providing abstractions and implementations that let URL services be defined in a uniform way to make them easy to reuse, test, and stub.
+Service is a Swift package providing abstractions and implementations to let URL services be defined in a uniform manner making them easy to reuse, test, and stub.
 
 # So what is a "service"?
 
-This library considers services as being a "opaque box" that takes a strongly typed `Input` argument, performs some impure activity with it, probably involving an external system via HTTPS, and finally returns some typed `Output` argument.
+This library considers services as being a "opaque box" that takes a strongly typed `Input` argument, performs some impure activity with it, probably involving an external system via HTTPS, and finally returns some typed `Output` argument. Services in Service are presented to clients as an `async` function.
 
 ## A motivating example
 
 Here's an example of a search service exposed by a "Catalogue" module for use by its clients.
 
 ```
-public enum CatalogueServiceDefinition: ServiceDefinition {
-	public typealias Input = [ItemQuery]
-	public typealias Output = Result<[ItemResult], CatalogueError>
-}
+typealias CatalogueSearchService = Service<[ItemQuery], Result<[ItemResult], CatalogueError>>
 ```
 
 A unit using Catalogue modules catalogue search might look like this:
@@ -30,7 +27,7 @@ import Service
 import Catalogue
 
 final class CatalogueSearchModel: ObservableObject {
-	let catalogueSearch: AsyncService<CatalogueServiceDefinition>
+	let catalogueSearch: CatalogueSearchService
 	@Published var state: ModelState = .initial
 	
 	func search(items: CatalogueItems) async {
@@ -42,7 +39,7 @@ final class CatalogueSearchModel: ObservableObject {
 		// object response. The interface looks like any other
 		// async function. When it completes, transition to the
 		// `.loaded` state with the successful or failed `Result`.
-		modelState = .loaded(await catalogueService(items))
+		modelState = .loaded(await catalogueSearch(items))
 	}
 	
 	var isLoading: Bool { state == .loading }
@@ -60,10 +57,7 @@ import Service
 import Catalogue
 
 final class CatalogueSearchModelTest: XCTestCase {
-	let mockSearchService = MockAsyncService<CatalogueServiceDefinition>(
-		stubOutput: .success([])
-	)
-	
+	let mockSearchService = CatalogueSearchService.Mock(stubOutput: .success([]))	
 	lazy var subject = CatalogueSearchModel(catalogueSearch: mockSearchService)
 	
 	func test_serachItems_stateIsLoadingDuringSearch() async {
@@ -76,7 +70,7 @@ final class CatalogueSearchModelTest: XCTestCase {
 }
 ```
 
-Service provides a consistent way to define both the external interfaces of these opaque boxes and also their internal implementation details. This helps you to test units that require services; test service implementation details; and reuse services between modules.
+Service provides a consistent way to define both the external interfaces of these opaque "Service" boxes, as well as their internal implementation details. This helps you to test units that require services; test service implementation details; and reuse services between modules.
 
 # Rational
 
@@ -84,21 +78,19 @@ Having seen an example service, how does this approach unlock the wild claims ma
 
 ## Encapsulated Design
 
-A service has `Input` and `Output` domain types. These are the result of client engineers encapsulating their understanding of the service's API in to Swift's type system. 
+A service type has `Input` and `Output` domain types. These are the result of client engineers encapsulating their understanding of the service's API in to Swift's type system. 
 
-If the API is a co-designed collaboration between the Swift engineers and API engineers, the service's types and implementation capture this significant alignment and co-design effort. As such, the service definition is a reusable embodiment of this embedded effort. It packages up all that work and effort for rapid integration in other teams with little or no need for new teams to align and fully understand the design process. 
+If the API is a co-designed collaboration between the Swift engineers and API engineers, the service's types and implementation capture this significant alignment and co-design effort. As such, the service definition is a reusable embodiment of this embedded effort. It packages up all that work and effort for rapid integration in other teams with little or no need for new teams to align with the service API, or fully understand the design process. 
 
 ## Encapsulated implementation, tests & validation
 
 A service will generally be implemented by building a `URLRequest` from the `Input` type and dispatching this to an API. It will then parse the API's response (and possible errors) in to the service `Output` type. While these two phases are often not complex, they frequently are many small and subtle facts that must be correctly handled for the API to behave correctly. A `ServiceDefinition` encapsulates this effort and makes it reusable.
 
-The service implementation should be tested, including any subtleties of creating a request or parsing, and good coverage of failure cases should be included. This is an investment that should be shared and reused among modules. Service definitions support this reuse and discourage ad-hoc reimplementations with divergent edge case handling.
-
-All of this is an well exploitable opportunity for code reuse.
+The service implementation should be tested, including any subtleties of creating a request or parsing, and good coverage of failure cases should be included. This is an investment that should be shared and reused among modules. The intent of Service is to support easy reuse and discourage ad-hoc reimplementations which leads to divergent edge case handling.
 
 ## Provision of domain language
 
-The domain types at the edge of a service should be a good model of the service domain. The availability of these types forms the basis of a language for modules consuming the service to communicate. The service definitions begin to establish a domain language for their client modules.
+The domain types of a service (`Input` and `Output`) should be good models of the service domains. The availability of these types forms the basis of a language with which modules consuming the service can communicate. Services begin to establish a domain language for their client modules.
 
 This encourages better collaboration and alignment between teams that use common services.
 
@@ -112,12 +104,12 @@ import Common
 import Service
 
 public struct CatalogueUI {
-	let serviceFactory: any URLServiceFactory<CommonServiceContext>
+	let serviceProvider: any URLServiceProvider<CommonServiceContext>
 
 	func catalogueView() -> some View {
 		CatalogueView(model: CatalogueSearchModel(
 			// Service is injected in to view model here.
-			catalogueSearch: serviceFactory.makeService()
+			catalogueSearch: .greeting(using: serviceProvider)
 		))
 	}
 }

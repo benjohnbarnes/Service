@@ -15,7 +15,7 @@ public typealias GreetingService = Service<String, Result<String, Error>>
 ///
 public extension GreetingService {
 
-    static func service(using builder: some URLServiceProviding<GreetingServicesContext>) -> Self {
+    static func greeting(using builder: some URLServiceProviding<GreetingServicesContext>) -> Self {
         Service { input in
             /// Need to flesh this out showing how ``Context`` is useful and show that it is testable.
             let url = builder.context.baseURL
