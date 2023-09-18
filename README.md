@@ -3,7 +3,7 @@
 Service helps you introduce a pattern which claims these benefits: 
 
 1. Support significant code reuse.
-2. Increase benefits from cross team collaborations / alignment.
+2. Increase benefits and reduce need for cross team collaborations / alignment.
 3. Improve testability of service implementations.
 4. Improve testability of service consumers.
 5. Avoid costly inconsistencies between systems.
@@ -20,41 +20,42 @@ It is a Swift package providing abstractions and implementations to let URL serv
 * They are very easy to reuse and share among modules.
 * Service implementations can be tested comprehensively, clearly and concisely.
 * Units consuming services can be tested comprehensively, clearly and concisely.
+* The service interface exposes only things clients care about and hides everything they don't.
 * Systems using services can replace them, at a single high level point, to target different backend environments, entirely stub them, or satisfy other scenarios.
 * Service use and implementation has nice Swift ergonomics.
 
-Nothing Service provides is clever or involved. However, Service's design has gone through quite a lot of iterations to find an approach most likely to achieve the design goals of shared services with strong testability & good ergonomics.
+Nothing Service provides is clever or involved. However, Service's design has gone through quite a lot of iteration to find an approach most likely to achieve the design goals of shared services with strong testability & good ergonomics.
 
 # So what is a "service"?
 
 This library considers a service to be an "opaque box" that takes a strongly typed `Input` argument, performs some impure activity with it (probably involving an external system over HTTPS), and finally returns some typed `Output` argument. Service gives clients flexibility in how they call a service, but out of the box provides an async function and a callback interface. Combine support is simple to add.
 
-**The fundamental claim is that this kind of box is a _"Really Good ™"_ abstraction and either directly provides or enables each of the CBs.**
+**The fundamental idea is that this kind of box is a _"Really Good ™"_ abstraction and either directly provides or enables each of the CBs.**
 
 There are three important view points of a `Service` box.
 
-## Client POV of a `Service`
+## Client view point of a `Service`
 
-Clients view a `Service` as just a function they have been given. You give it some kind of `Input` and later, it gives you some kind of `Output`. All you care about are its two domain types: `Input` and `Output`. These are both as isolated from implementation details as is appropriate for the service in question. 
+Clients view a `Service` as just a function they have been given. You give it an `Input` and later, it asynchronously returns an `Output`. All they care about are its two domain types: `Input` and `Output`. These are both as isolated from implementation details as is appropriate for the service in question. 
 
-Because a `Service` is, externally, **just a function**, client behaviour can be unit tested merely by checking they call services with the correct `Input` and take appropriate action for any given `Output`. The implementation and the testing are oblivious of all network level concerns. 
+Because a `Service` is, externally, **just a function**, client behaviour can be unit tested merely by checking they call services passing the correct `Input` and take appropriate action on receiving consequent `Output`. The implementation and the testing are oblivious of all network level concerns. 
 
-## Implementation POV of a `Service`
+## Implementation view point of a `Service`
 
-Service implementations know about backend details such as whether HTTP and REST are even being used. Assuming they are:
+Service implementations know about backend details such as whether HTTP and REST are being used. Assuming they are:
 
 * The implementation knows how to **prepare a request**. It knows necessary headers, URL query parameters, HTTP verbs, authorisation mechanisms, and any data payload to send. The implementation knows how to prepare this request based on the `Input` type, along with any other shared `Context` that is necessary. 
 * The implementation also knows how to **parse a response**. It knows about response headers to check, the meaning of the return code, how to parse a payload, how to report errors it encounters and perhaps recover from them.
 
 The implementation is all about taking the `Service`'s `Input` domain, doing sensible stuff with a network, then taking the network's response, and turning that back in to some kind of `Output`.
 
-`Service` implementations live in the network layer and act as a conduit from their `Input` to their `Output` via the network.
+`Service` implementations live on the shores of the network layer sea and act as a conduit from their `Input` to their `Output` via the network.
 
 We can fully test service implementations by ensuring:
 * Given an `Input` they ask the network the right question.
-* Given a network response, they produce the appropriate `Output`
+* Given a network response, they produce the appropriate `Output`.
 
-## Integrator POV of a `Service`
+## Integrator view point of a `Service`
 
 An integrator wants to instantiate units that expect various `Service` types. It doesn't care what a `Service` does or how it works. It just needs a way to get services and to inject where they are required. An Integrator is happy if, given some sort of generic facility, they can ergonomically obtain instances of services for their units. They'd like to be able to have high level control of that facility so that all services can be pointed at a different backend environment, or entirely replaced with stubbed out scenarios that read from files.
 
@@ -201,14 +202,30 @@ Examples of the kinds of facilities `Context` is needed for are:
 
 The `Context` lets these to be cleanly injected in to service definitions without looking for thiem in globals, or needing to explicitly pass these dependencies about.
 
-## Managing multiple environments
+## Multiple environments & global service stubbing
 
-The `Context` of the `URLServiceProvider` should provide a mechanism for mapping from service paths to URLs. This is an effective mechanism to redirect a module to alternative environments such as staging and production. Switching between environments is opaque to modules making use of services.
+`CatalogueModule` lets any `URLServiceProviding<CommonServiceContext>` type be injected. 
 
-This provides part of claimed benefit 6.
+The shared `CommonServiceContext` type should include a mechanism mapping from service paths to URLs. With this, an integrating module can redirect its resources to specific environments, such as staging and production. The environment in use is opaque to modules making use of services. By injecting a `URLServiceProvider<CommonServiceContext>` implementation in to the module it will build "real" endpoints that access the API over the network using a `URLSession`.  
 
-## Stubbing Services
+The `URLServiceProviding` dependency of `CatalogueModule` also let other conforming types be injected. This lets the integrating application inject a stubbing implementation. The services are built from this they will instead use potted data from local JSON files, use a local database, or even run ad-hoc code. The approach scales to a whole App letting it run entirely against local stubbed services under various usage scenarios.
 
-The `URLServiceProviding` dependency of `CatalogueModule` lets any conforming type be injected. As well as a production factory `URLServiceProvider` that uses a `URLService` instance, it is possible to inject a stub. Giving the module a stub lets all its services be replaced with local stubs. These could read from JSON files, use a local database, or even run ad-hoc code. The approach scales to a whole App so that it can be run entirely against local stubbed services for various usage scenarios.
+Building services in modules from an injected `URLServiceProviding` provides CB 6.
 
-This provides the rest of CB 6.
+
+# Anticipated Questions
+
+### What about if I integrate services that expect more than one kind of `Context`?
+
+In this case your top level composition root should have `URLServiceProviding` instances for each kind of context in use. It is hoped that individual modules should settle on a single `Context` type, and generally, it is beneficial for larger groups of modules to share a single `Context` type. However, if a module does use services built from different `Context` types, this can be readily accommodated.
+
+### How do I bump the shared `Context`?
+
+The shared `Context` type is likely to be depended on by many libraries for building their endpoints. However, it can still be readily evolved to support new requirements. It is worth taking reasonable efforts to make `Context` changes **Non Breaking**, whenever possible.
+
+There may be benefits in using `protocol`s to support extra capabilities that _some_ services require the `Context` to provide. This will enable just subsystems wishing to instantiate those specific services to obtain a `Context` satisfying the additional requirements and other integrating applications can be left undisturbed. 
+
+### Are non HTTP(S) service supported?
+
+Yes. There's no particular reason to only build services using `URLSession`. Other service implementations can be supported. This would suggest the development of another interface similar to `URLServiceProviding`. `static` functions to provide service implementations would then take this new type.
+
