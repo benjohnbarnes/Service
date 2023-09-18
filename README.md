@@ -13,7 +13,9 @@ I'll try to justify these tall claims as you read on…
 
 # What does Service provide?
 
-Service provides very little! It is a Swift package providing abstractions and implementations to let URL services be defined in a uniform manner such that:
+Service provides very little! 
+
+It is a Swift package providing abstractions and implementations to let URL services be defined in a uniform manner such that:
 
 * They are very easy to reuse and share among modules.
 * Service implementations can be tested comprehensively, clearly and concisely.
@@ -21,15 +23,15 @@ Service provides very little! It is a Swift package providing abstractions and i
 * Systems using services can replace them, at a single high level point, to target different backend environments, entirely stub them, or satisfy other scenarios.
 * Service use and implementation has nice Swift ergonomics.
 
-Nothing Service provides is clever or involved. However, Service's design has gone through many iterations to find an approach most likely to achieve the design goals of shared services with strong testability & good ergonomics.
+Nothing Service provides is clever or involved. However, Service's design has gone through quite a lot of iterations to find an approach most likely to achieve the design goals of shared services with strong testability & good ergonomics.
 
 # So what is a "service"?
 
 This library considers a service to be an "opaque box" that takes a strongly typed `Input` argument, performs some impure activity with it (probably involving an external system over HTTPS), and finally returns some typed `Output` argument. Service gives clients flexibility in how they call a service, but out of the box provides an async function and a callback interface. Combine support is simple to add.
 
-The claim is that this kind of box is a "Really Good ™" abstraction and it either directly provides or enables each of the CBs.
+**The fundamental claim is that this kind of box is a _"Really Good ™"_ abstraction and either directly provides or enables each of the CBs.**
 
-There are two important view points of a `Service` box.
+There are three important view points of a `Service` box.
 
 ## Client POV of a `Service`
 
@@ -52,16 +54,21 @@ We can fully test service implementations by ensuring:
 * Given an `Input` they ask the network the right question.
 * Given a network response, they produce the appropriate `Output`
 
+## Integrator POV of a `Service`
+
+An integrator wants to instantiate units that expect various `Service` types. It doesn't care what a `Service` does or how it works. It just needs a way to get services and to inject where they are required. An Integrator is happy if, given some sort of generic facility, they can ergonomically obtain instances of services for their units. They'd like to be able to have high level control of that facility so that all services can be pointed at a different backend environment, or entirely replaced with stubbed out scenarios that read from files.
+
 ## A motivating example
 
 Here's an example of a search service exposed by a "Catalogue" module for use by its clients.
 
 ```
 import Service
-public typealias CatalogueSearchService = Service<[ItemQuery], Result<[ItemResult], CatalogueError>>
+public typealias CatalogueSearchService = 
+    Service<[ItemQuery], Result<[ItemResult], CatalogueError>>
 ```
 
-Note: no implementation is provided (yet) for this service, and that's fine because clients don't care about this! The service is helpful already because we can use it in client modules and test those modules.
+Note: no implementation is provided (yet) for this service, and that's fine because clients won't care about implementation details! The service declaration is already helpful because we can use it in client modules and tests of those modules.
 
 A unit using Catalogue module's search might look like this:
 
@@ -126,39 +133,39 @@ This helps test units that require services; test service implementation details
 
 # Justifying CBs 1-5
 
-Having seen an example service, how does this approach unlock the wild claimed benefits (CBs)?
+Having seen an example service, how does this approach unlock the wild "claimed benefits" (CBs)?
 
-## Encapsulated declaration & implementation
+## Declared type & encapsulated implementation
 
-A service type declaration has `Input` and `Output` domain types. These types are the result of client engineers encapsulating their understanding of the service's API in to Swift's type system. Reaching understanding may have needed substantial research and perhaps asking / aligning with the API team.
+A service type is declared with `Input` and `Output` domain types. These types are the result of client engineers embedding their understanding of the service's API in to Swift's type system. Reaching this understanding may have needed substantial research and perhaps asking / aligning with the API team.
 
-If an API is a co-designed collaboration between the Swift engineers and API engineers, the service's declaration captures this alignment and co-design effort. As such, **a service declaration is often a reusable embodiment of considerable embedded effort**. It packages up engineer time and effort in to a package which can be rapidly integrated by other teams, with much less need for new teams to understand the service API or the design decisions behind it.
+If an API is a co-designed collaboration between the Swift engineers and API engineers, the service's declaration captures this alignment and co-design effort. As such, **a service declaration is often a reusable embodiment of considerable embedded effort**. It literally packages up engineer time and effort in to a form which can be rapidly integrated by other teams, with much less need for new teams to understand the service's API or the design decisions informing it.
 
-A service will generally be implemented by building a `URLRequest` from the `Input` type and dispatching this to an API. It will then parse the API's response and handle errors, and provide some service `Output` type. While these two phases are often not complex, they frequently have many small and subtle facts that must be properly handled for the API to behave correctly and consistently. Once again, the exact details of all of this can require considerable discussion and alignment between client and API engineering teams, and also substantial engineer time. **A service implementation encapsulates this effort and makes it correctly and consistently reusable.**
+A service will generally be implemented by building a `URLRequest` from the `Input` type and dispatching this to an API. It will then parse the API's response and handle errors, and provide some service `Output` type. While these two phases are often not complex, they frequently have many small and subtle facts that must be properly handled for the API to behave correctly and consistently. Once again, the exact details of all of this can require considerable discussion and alignment between client and API engineering teams, and also substantial engineer time. **A service implementation encapsulates this effort and makes correctness reusable, granting consistency.**
 
-The service type declaration and its implementation provide CBs 1, 2 & 5.
+The service type declaration and its implementation provides CBs 1, 2 & 5.
 
 ## Encapsulated tests & validation
 
-Service implementations should be tested, including any subtleties of creating a request or parsing. Good coverage of failure cases should also be included. Understanding edge cases is often a result of significant engineering work and might also require careful alignment between client and API teams. This is an investment that should be shared and reused among modules. Service inherently support reuse of tests because when services are encapsulated, so are their tests.
+Service implementations should be tested, including any subtleties of creating a request or parsing. Good coverage of failure cases should be included. Understanding edge cases is often a result of significant engineering work and might additionally require careful alignment between client and API teams. This is an investment that should be shared and reused among modules. Service inherently supports reuse of tests because when a `Service` is encapsulated, so are its tests.
 
 Encapsulated tests provides CBs 3 & 5.
 
 ## Free Mocks
 
-The Service library automatically provides each `Service` with a consistent mock implementation for testing the correct behaviour of units. This can be used before Services are even implemented, a backend exists, or mock JSON is available. Units using services are tested in the domain the the service (its Input and Output), and not in the REST domain that includes details such as service JSON encoding. 
+The Service library automatically provides each `Service` with a consistent mock implementation for testing the correct behaviour of units. The mock can be used before a `Service` has an implementation, a backend exists, or mock JSON is available. Units using a `Service` are tested in the domain the the `Service` (its `Input` and `Output`), and not in the REST domain that includes details such as service JSON encoding and HTTP niceties.
 
-Modules that define services can also provide test data for stubbing so that integrating units can ensure they properly handle all cases a service can provide. Again – the test data is in the domain of the service and not at the REST level.
+Modules that define services can also provide test domain data for stubbing so that integrating units can ensure they properly handle all cases a service can provide. Test data is in the domain of the service and not at the REST level.
 
-The availability of free mocks supporting standard test data covers CBs 4 & 5. 
+The availability of free mocks supporting standard test data covers CBs 4 & 5.
 
 ## Avoidance of inconsistency
 
-When service implementations are needed in several places and can't be reused, they are instead reimplemented. 
+When service implementations are needed in several places and can't be reused, they are instead reimplemented.
 
-Reimplementation leads to a very high likely-hood of **inconsistencies such as divergent edge case handling**. 
+Reimplementation leads to a very high likely-hood of **inconsistencies such as divergent edge case handling**.
 
-Inconsistency has pernicious, ongoing and often enormously expensive consequences that can impact everyone developing and using a system. Consider how many meetings are about trying to resolve differing live approaches and how difficult these can be to harmonise. 
+Inconsistency has pernicious, ongoing and often enormously expensive consequences. It can impact everyone developing and using a system. Consider how many meetings are about trying to resolve differing live approaches and how difficult these can be to harmonise.
 
 Making services easily reusable provides CB 5.
 
@@ -179,7 +186,7 @@ public struct CatalogueModule {
 
 	func catalogueView() -> some View {
 		CatalogueView(model: CatalogueSearchModel(
-			// Service is injected in to view model here.
+			// The service is created and injected in to the unit here:
 			catalogueSearch: .catalogueSearch(using: serviceProvider)
 		))
 	}
