@@ -8,7 +8,10 @@ public protocol Servicing<Input, Output> {
 // MARK: -
 
 public extension Servicing {
-    /// Nicer call semantics so that `Servicing` types can be used like functions.
+    /// Call the service as an async function
+    ///
+    /// - Parameter input: Input value to pass to the service.
+    ///
     func callAsFunction(_ input: Input) async -> Output {
         await fetch(input: input)
     }

@@ -18,7 +18,7 @@ import Foundation
 ///
 public protocol URLServiceProviding<Context> {
 
-    /// A type given to all service implementations to pass them common shared details
+    /// A type given to all URL service implementations to pass them common shared details
     /// needed by their implementations.
     ///
     associatedtype Context
