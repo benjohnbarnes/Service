@@ -1,12 +1,13 @@
-# Service – Promised Benefits
+# Service – the Claimed Benefits [CBs!]
 
 Service helps you introduce a pattern which claims these benefits: 
 
 1. Support significant code reuse.
 2. Increase benefits from cross team collaborations / alignment.
-3. Improve testability of services (of services and units using services).
-4. Reduces costly inconsistencies between systems.
-5. Allows easy reconfiguration of systems to use different backend environments or stubs.
+3. Improve testability of service implementations.
+4. Improve testability of service consumers.
+5. Avoid costly inconsistencies between systems.
+6. Allow easy reconfiguration of systems to use different backend environments or stubs.
 
 I'll try to justify these tall claims as you read on…
 
@@ -24,9 +25,32 @@ Nothing Service provides is clever or involved. However, Service's design has go
 
 # So what is a "service"?
 
-This library considers a service to be an "opaque box" that takes a strongly typed `Input` argument, performs some impure activity with it that probably involves an external system using HTTPS, and finally returns some typed `Output` argument. Service gives clients flexibility in how they call a service, but provides out of the box an async function and a callback interface. Combine support is simple to add.
+This library considers a service to be an "opaque box" that takes a strongly typed `Input` argument, performs some impure activity with it (probably involving an external system over HTTPS), and finally returns some typed `Output` argument. Service gives clients flexibility in how they call a service, but out of the box provides an async function and a callback interface. Combine support is simple to add.
 
-The claim is that this kind of box is a "Really Good ™" abstraction and it either directly provides, or enables each of the benefits.
+The claim is that this kind of box is a "Really Good ™" abstraction and it either directly provides or enables each of the CBs.
+
+There are two important view points of a `Service` box.
+
+## Client POV of a `Service`
+
+Clients view a `Service` as just a function they have been given. You give it some kind of `Input` and later, it gives you some kind of `Output`. All you care about are its two domain types: `Input` and `Output`. These are both as isolated from implementation details as is appropriate for the service in question. 
+
+Because a `Service` is, externally, **just a function**, client behaviour can be unit tested merely by checking they call services with the correct `Input` and take appropriate action for any given `Output`. The implementation and the testing are oblivious of all network level concerns. 
+
+## Implementation POV of a `Service`
+
+Service implementations know about backend details such as whether HTTP and REST are even being used. Assuming they are:
+
+* The implementation knows how to **prepare a request**. It knows necessary headers, URL query parameters, HTTP verbs, authorisation mechanisms, and any data payload to send. The implementation knows how to prepare this request based on the `Input` type, along with any other shared `Context` that is necessary. 
+* The implementation also knows how to **parse a response**. It knows about response headers to check, the meaning of the return code, how to parse a payload, how to report errors it encounters and perhaps recover from them.
+
+The implementation is all about taking the `Service`'s `Input` domain, doing sensible stuff with a network, then taking the network's response, and turning that back in to some kind of `Output`.
+
+`Service` implementations live in the network layer and act as a conduit from their `Input` to their `Output` via the network.
+
+We can fully test service implementations by ensuring:
+* Given an `Input` they ask the network the right question.
+* Given a network response, they produce the appropriate `Output`
 
 ## A motivating example
 
@@ -36,6 +60,8 @@ Here's an example of a search service exposed by a "Catalogue" module for use by
 import Service
 public typealias CatalogueSearchService = Service<[ItemQuery], Result<[ItemResult], CatalogueError>>
 ```
+
+Note: no implementation is provided (yet) for this service, and that's fine because clients don't care about this! The service is helpful already because we can use it in client modules and test those modules.
 
 A unit using Catalogue module's search might look like this:
 
@@ -67,9 +93,9 @@ final class CatalogueSearchModel: ObservableObject {
 } 
 ```
 
-The example shows how the external interface of a service is simple and guides consuming units by using the domain types for input and output.
+The example shows how the external interface of a service is simple and guides consuming units to use the domain `Input` and `Output` types.
 
-In tests of `CatalogueSearchModel` Service provides easiy and consistent stubs of `CatalogueSearchService`. We can starts testing `CatalogueSearchModel` as soon as the service's `Input` and `Output` types are defined, before a `CatalogueSearchService` implementation is available.
+In tests of `CatalogueSearchModel` Service provides easy to use and consistent stubs of `CatalogueSearchService`. We can starts testing `CatalogueSearchModel` as soon as the service's `Input` and `Output` types are defined, before an implementation is available.
 
 A test might look like this:
 
@@ -91,33 +117,32 @@ final class CatalogueSearchModelTest: XCTestCase {
 }
 ```
 
-Service provides a consistent way to define both the external interfaces of these opaque "Service" boxes, as well as their internal implementation details. This helps test units that require services; test service implementation details; and reuse services between modules.
+Service provides:
 
-# Rational
+* A consistent way to define both the external interfaces of opaque "Service" boxes
+* A consistent way to build and expose service implementations. 
 
-Having seen an example service, how does this approach unlock the wild claimed benefits?
+This helps test units that require services; test service implementation details; and reuse services between modules.
 
-## Encapsulated design
+# Justifying CBs 1-5
 
-A service type has `Input` and `Output` domain types. These are the result of client engineers encapsulating their understanding of the service's API in to Swift's type system. 
+Having seen an example service, how does this approach unlock the wild claimed benefits (CBs)?
 
-If the API is a co-designed collaboration between the Swift engineers and API engineers, the service's types and implementation capture this significant alignment and co-design effort. As such, the service definition is a reusable embodiment of this embedded effort. It packages up that work and effort for rapid integration in other teams, with little or no need for new teams to align with the service API, or fully understand the design process.
+## Encapsulated declaration & implementation
 
-Encapsulation of design covers claimed benefits 1 & 2. 
+A service type declaration has `Input` and `Output` domain types. These types are the result of client engineers encapsulating their understanding of the service's API in to Swift's type system. Reaching understanding may have needed substantial research and perhaps asking / aligning with the API team.
 
-## Encapsulated implementation
+If an API is a co-designed collaboration between the Swift engineers and API engineers, the service's declaration captures this alignment and co-design effort. As such, **a service declaration is often a reusable embodiment of considerable embedded effort**. It packages up engineer time and effort in to a package which can be rapidly integrated by other teams, with much less need for new teams to understand the service API or the design decisions behind it.
 
-A service will generally be implemented by building a `URLRequest` from the `Input` type and dispatching this to an API. It will then parse the API's response and handle errors, to provide some service `Output` type. While these two phases are often not complex, they frequently have many small and subtle facts that must be correctly handled for the API to behave correctly and consistently. Once again, the exact details of all of this can require considerable discussion and alignment between client and API engineering teams. A `Service` encapsulates this effort and makes it correctly and consistently reusable.
+A service will generally be implemented by building a `URLRequest` from the `Input` type and dispatching this to an API. It will then parse the API's response and handle errors, and provide some service `Output` type. While these two phases are often not complex, they frequently have many small and subtle facts that must be properly handled for the API to behave correctly and consistently. Once again, the exact details of all of this can require considerable discussion and alignment between client and API engineering teams, and also substantial engineer time. **A service implementation encapsulates this effort and makes it correctly and consistently reusable.**
 
-Encapsulation of implementation also covers claimed benefits 1 & 2.
+The service type declaration and its implementation provide CBs 1, 2 & 5.
 
 ## Encapsulated tests & validation
 
-Service implementations should be tested, including any subtleties of creating a request or parsing. Good coverage of failure cases should also be included. This is an investment that should be shared and reused among modules. The intent of Service is to support easy reuse and discourage ad-hoc reimplementations that leads to **divergent edge case handling and inconsistency**.
+Service implementations should be tested, including any subtleties of creating a request or parsing. Good coverage of failure cases should also be included. Understanding edge cases is often a result of significant engineering work and might also require careful alignment between client and API teams. This is an investment that should be shared and reused among modules. Service inherently support reuse of tests because when services are encapsulated, so are their tests.
 
-Implementations should also be validated to actually behave as expected in an integrated system. To a significant but lesser degree, validation can also be shared by using a Service implementation.
-
-Encapsulated tests & validation covers claimed benefits 3 & 4.
+Encapsulated tests provides CBs 3 & 5.
 
 ## Free Mocks
 
@@ -125,14 +150,24 @@ The Service library automatically provides each `Service` with a consistent mock
 
 Modules that define services can also provide test data for stubbing so that integrating units can ensure they properly handle all cases a service can provide. Again – the test data is in the domain of the service and not at the REST level.
 
-The availability of free mocks and support for standard test data covers claimed benefits 3. 
+The availability of free mocks supporting standard test data covers CBs 4 & 5. 
+
+## Avoidance of inconsistency
+
+When service implementations are needed in several places and can't be reused, they are instead reimplemented. 
+
+Reimplementation leads to a very high likely-hood of **inconsistencies such as divergent edge case handling**. 
+
+Inconsistency has pernicious, ongoing and often enormously expensive consequences that can impact everyone developing and using a system. Consider how many meetings are about trying to resolve differing live approaches and how difficult these can be to harmonise. 
+
+Making services easily reusable provides CB 5.
 
 
 # Injecting Services
 
-Justifying the final claim that Service makes it easy for an integrating system to reconfigure its services or use stubs needs the motivating example to be extended.
+Justifying CB 6, that Service makes it easy for an integrating system to reconfigure services or use stubs needs the motivating example to be extended.
 
-We're going to extend "CatalogueUI" module that includes the `CatalogueSearchModel` to include a `CatalogueModule` instance that can build a view for us:
+We'll extend the "CatalogueUI" module which is the home of `CatalogueSearchModel` to include a `CatalogueModule` instance which can build a view for us:
 
 ```
 import Common
@@ -153,7 +188,7 @@ public struct CatalogueModule {
 
 ## Shared `Context`
 
-A common service context is introduced by the type `CommonServiceContext`. It is frequently the case that service implementations require additional environmental dependencies. `CommonServiceContext` is a facility to supply these. Services generically supports any kind of shared `Context` rather than defining a specific type.
+A common service context is introduced by the client type `CommonServiceContext`. It is frequently the case that service implementations require additional environmental dependencies. `CommonServiceContext` holds these. Services supports a generic shared `Context` type, rather than defining a specific one.
 
 Examples of the kinds of facilities `Context` is needed for are:
 
@@ -162,16 +197,16 @@ Examples of the kinds of facilities `Context` is needed for are:
 * A telemetry interface that response parsing errors should be dispatched to.
 * Optional additional headers that client can configure.
 
-The `Context` allow these to be cleanly injected to service definitions without pulling them out of globals, or needing to explicitly pass these dependencies about.
+The `Context` lets these to be cleanly injected in to service definitions without looking for thiem in globals, or needing to explicitly pass these dependencies about.
 
 ## Managing multiple environments
 
 The `Context` of the `URLServiceProvider` should provide a mechanism for mapping from service paths to URLs. This is an effective mechanism to redirect a module to alternative environments such as staging and production. Switching between environments is opaque to modules making use of services.
 
-This provides part of claimed benefit 5.
+This provides part of claimed benefit 6.
 
 ## Stubbing Services
 
 The `URLServiceProviding` dependency of `CatalogueModule` lets any conforming type be injected. As well as a production factory `URLServiceProvider` that uses a `URLService` instance, it is possible to inject a stub. Giving the module a stub lets all its services be replaced with local stubs. These could read from JSON files, use a local database, or even run ad-hoc code. The approach scales to a whole App so that it can be run entirely against local stubbed services for various usage scenarios.
 
-This provides the other claimed benefits of 5.
+This provides the rest of CB 6.
