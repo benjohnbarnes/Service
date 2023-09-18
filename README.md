@@ -62,17 +62,19 @@ An integrator wants to instantiate units that expect various `Service` types. It
 
 Here's an example of a search service exposed by a "Catalogue" module for use by its clients.
 
-```
+```swift
 import Service
 public typealias CatalogueSearchService = 
     Service<[ItemQuery], Result<[ItemResult], CatalogueError>>
 ```
 
-Note: no implementation is provided (yet) for this service, and that's fine because clients won't care about implementation details! The service declaration is already helpful because we can use it in client modules and tests of those modules.
+> A quick tip – some services don't need any input parameters. You can define them as `Service<Void, InterestingOutput>` 
+
+Note: no implementation is provided (yet) for this service. That's fine because clients don't and can't care about implementation details! Even with no implementation at all, or API to talk to, the service declaration lets us build and test client modules.
 
 A unit using Catalogue module's search might look like this:
 
-```
+```swift
 import Service
 import Catalogue
 
@@ -102,11 +104,11 @@ final class CatalogueSearchModel: ObservableObject {
 
 The example shows how the external interface of a service is simple and guides consuming units to use the domain `Input` and `Output` types.
 
-In tests of `CatalogueSearchModel` Service provides easy to use and consistent stubs of `CatalogueSearchService`. We can starts testing `CatalogueSearchModel` as soon as the service's `Input` and `Output` types are defined, before an implementation is available.
+In tests of `CatalogueSearchModel` Service provides easy to use and consistent stubs of `CatalogueSearchService`. We can start testing `CatalogueSearchModel` as soon as the service's `Input` and `Output` types are defined, before an implementation is available.
 
 A test might look like this:
 
-```
+```swift
 import Service
 import Catalogue
 
@@ -124,13 +126,6 @@ final class CatalogueSearchModelTest: XCTestCase {
 }
 ```
 
-Service provides:
-
-* A consistent way to define both the external interfaces of opaque "Service" boxes
-* A consistent way to build and expose service implementations. 
-
-This helps test units that require services; test service implementation details; and reuse services between modules.
-
 # Justifying CBs 1-5
 
 Having seen an example service, how does this approach unlock the wild "claimed benefits" (CBs)?
@@ -141,7 +136,7 @@ A service type is declared with `Input` and `Output` domain types. These types a
 
 If an API is a co-designed collaboration between the Swift engineers and API engineers, the service's declaration captures this alignment and co-design effort. As such, **a service declaration is often a reusable embodiment of considerable embedded effort**. It literally packages up engineer time and effort in to a form which can be rapidly integrated by other teams, with much less need for new teams to understand the service's API or the design decisions informing it.
 
-A service will generally be implemented by building a `URLRequest` from the `Input` type and dispatching this to an API. It will then parse the API's response and handle errors, and provide some service `Output` type. While these two phases are often not complex, they frequently have many small and subtle facts that must be properly handled for the API to behave correctly and consistently. Once again, the exact details of all of this can require considerable discussion and alignment between client and API engineering teams, and also substantial engineer time. **A service implementation encapsulates this effort and makes correctness reusable, granting consistency.**
+A service will generally be implemented by building a `URLRequest` from the `Input` type and dispatching this to an API. It will then parse the API's response and handle errors, and provide some service `Output` type. While these two phases are often not complex, they frequently have many small and subtle facts that must be properly handled for the API to behave correctly and consistently. Once again, the exact details of all of this can require considerable discussion and alignment between client and API engineering teams, and also substantial engineer time. **A service implementation encapsulates this effort and makes correctness reusable, providing consistency.**
 
 The service type declaration and its implementation provides CBs 1, 2 & 5.
 
@@ -172,11 +167,11 @@ Making services easily reusable provides CB 5.
 
 # Injecting Services
 
-Justifying CB 6, that Service makes it easy for an integrating system to reconfigure services or use stubs needs the motivating example to be extended.
+Justifying CB 6, that Service makes it easy for an integrating system to reconfigure services or use stubs, needs the motivating example to be extended.
 
 We'll extend the "CatalogueUI" module which is the home of `CatalogueSearchModel` to include a `CatalogueModule` instance which can build a view for us:
 
-```
+```swift
 import Common
 import Catalogue
 import Service
