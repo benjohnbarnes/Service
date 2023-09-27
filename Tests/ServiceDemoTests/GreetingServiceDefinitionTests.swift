@@ -3,9 +3,11 @@ import XCTest
 import Service
 import ServiceDemo
 
+/// DOCUMENT!
+/// 
 final class GreetingServiceDefinitionTests: XCTestCase {
 
-    let mockProvider = URLServiceProvider<GreetingServicesContext>.Mock(context: .test)
+    let mockProvider = MockServiceProvider(baseURL: .testBaseURL)
     lazy var subject: GreetingService = .greeting(using: mockProvider)
 
     func test_requestHasCorrectURL() async throws {
@@ -33,7 +35,7 @@ final class GreetingServiceDefinitionTests: XCTestCase {
 
 // MARK: -
 
-private extension GreetingServicesContext {
-    static let test = GreetingServicesContext(baseURL: URL(string: "example.com")!)
+private extension URL {
+    static let testBaseURL = URL(string: "example.com")!
 }
 

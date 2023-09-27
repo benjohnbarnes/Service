@@ -16,6 +16,11 @@ public final class GreetingUnit: ObservableObject {
     let greetingService: GreetingService
     @Published public var isLoading: Bool = false
 
+    /// Create unit by passing in a service.
+    ///
+    /// The ergonomics of this approach are nice both in unit tests and also in a module
+    /// for building units from a `ServiceProvider`
+    ///
     public init(greetingService: GreetingService) {
         self.greetingService = greetingService
     }

@@ -15,15 +15,21 @@ public typealias GreetingService = Service<String, Result<String, Error>>
 ///
 public extension GreetingService {
 
-    static func greeting(using builder: some URLServiceProviding<GreetingServicesContext>) -> Self {
+    /// Build a `GreetingService` from `some ServiceProviding`.
+    ///
+    /// This can be used directly in a unit test, or it can be used in a module instance to build
+    /// service to inject in to units. By providing an appropriate `ServiceProviding` implementation
+    /// the services built can be mocked, stubbed, or pointed to real production services. Adjusting
+    /// the implementation's properties allows alternative server environments to be used, etc.
+    /// 
+    static func greeting(using provider: some ServiceProviding) -> Self {
         Service { input in
-            /// Need to flesh this out showing how ``Context`` is useful and show that it is testable.
-            let url = builder.context.baseURL
+            let url = provider.baseURL
                 .appending(path: "greeting")
                 .appending(path: input)
 
             let request = URLRequest(url: url)
-            let result = await builder.perform(request: request)
+            let result = await provider.perform(request: request)
 
             return Result {
                 let (data, _) = try result.get()

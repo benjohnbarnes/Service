@@ -1,15 +1,15 @@
 import Foundation
 
-/// Implementation of `URLServiceBuilder` intended for production use that
-/// will build services calling a `URLSession` instance.
+/// Implementation of `ServiceProvider` for production use. Actually sends `URLRequest`s to
+/// a `URLSession`
 ///
-public struct URLServiceProvider<Context>: URLServiceProviding {
+public struct ServiceProvider: ServiceProviding {
 
     let session: URLSession
-    public let context: Context
+    public let baseURL: URL
 
-    public init(context: Context, session: URLSession = .shared) {
-        self.context = context
+    public init(baseURL: URL, session: URLSession = .shared) {
+        self.baseURL = baseURL
         self.session = session
     }
 
