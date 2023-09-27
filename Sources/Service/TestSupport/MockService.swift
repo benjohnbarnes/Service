@@ -1,6 +1,6 @@
 import Foundation
 
-public extension Servicing {
+public extension Service {
     typealias Mock = MockService<Input, Output>
 }
 
@@ -11,7 +11,7 @@ public extension Servicing {
 /// `Definition` need only be a `ServiceDefinition`, so `MockAsyncService` can be created to test
 /// units before the `Definition` has an implementation approach.
 ///
-public final class MockService<Input, Output>: Servicing {
+public final class MockService<Input, Output> {
 
     /// Capture the input the unit was called with.
     ///
@@ -37,5 +37,5 @@ public final class MockService<Input, Output>: Servicing {
         return self.stubOutput
     }
 
-    public var service: Service<Input, Output> { Service(self) }
+    public var service: Service<Input, Output> { Service(fetch(input:)) }
 }

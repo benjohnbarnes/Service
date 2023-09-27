@@ -36,7 +36,7 @@
 /// }
 /// ```
 ///
-public struct Service<Input, Output>: Servicing {
+public struct Service<Input, Output> {
     let implementation: (Input) async -> Output
 
     /// Retrieve a response from the service.
@@ -44,6 +44,11 @@ public struct Service<Input, Output>: Servicing {
     /// - Parameter input: The input to send the service.
     public func fetch(input: Input) async -> Output {
         await implementation(input)
+    }
+
+    /// For services that return a `Result` type, call throwing instead.
+    public func tryFetch<Success, Failure>(input: Input) async throws -> Success where Output == Result<Success, Failure> {
+        try await fetch(input: input).get()
     }
 }
 
@@ -60,17 +65,28 @@ extension Service {
     public init(_ implementation: @escaping (Input) async -> Output) {
         self.implementation = implementation
     }
+}
 
-    /// Create a service from another service of the same type.
+// MARK: -
+
+public extension Service {
+    /// Call the service as an async function
     ///
-    public init(_ service: Service<Input, Output>) {
-        implementation = service.implementation
+    /// - Parameter input: Input value to pass to the service.
+    ///
+    func callAsFunction(_ input: Input) async -> Output {
+        await fetch(input: input)
     }
 
-    /// Create a service wrapping any `Servicing` instance – this is largely to help
-    /// support building mock services.
-    /// 
-    public init<S: Servicing>(_ servicing: S) where S.Input == Input, S.Output == Output {
-        implementation = servicing.fetch(input:)
+    /// Invoke the Service in completion style.
+    ///
+    /// - Parameter input: Input value to pass to the service.
+    /// - Parameter completion: callback block to be invoked with the service result.
+    ///
+    func invoke(on input: Input, completion: @escaping(Output) -> Void) {
+        Task {
+            let result = await self(input)
+            completion(result)
+        }
     }
 }
