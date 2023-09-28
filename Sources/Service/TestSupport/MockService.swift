@@ -21,9 +21,9 @@ public final class MockService<Input, Output> {
     ///
     public var stubOutput: Output
 
-    /// Called after after each service invocation, but before service completion. Use this
-    /// to assert unit state during their service calls. Eg – that a unit is in the loading
-    /// state during a service call.
+    /// Called after each service invocation, but before service completion. Use this to
+    /// assert subject state **during** their service calls. Eg – that a subject is in the
+    /// loading state during a service call.
     ///
     public var validationHook: (() async -> Void)?
 

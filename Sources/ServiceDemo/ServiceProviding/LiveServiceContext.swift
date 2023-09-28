@@ -1,6 +1,6 @@
 import Foundation
 
-/// Implementation of `ServiceProvider` for production use. Actually sends `URLRequest`s to
+/// Implementation of `ServiceContext` for production use. Actually sends `URLRequest`s to
 /// a `URLSession`
 ///
 public struct LiveServiceContext: ServiceContext {

@@ -1,8 +1,11 @@
 
 /// An concrete interface to consume a service.
 ///
-/// `Service` wraps an async function. It takes a strong domain type `Input` and returns a
-/// strong domain type `Output`.
+/// `Service` wraps an async function and gives it a "nominal type". This is useful because
+/// Swift lets a nominal type be extended with a static factory function and provides ergonomic
+/// autocompletion of the function name.
+///
+/// A `Service` takes a strong domain type `Input` and returns a strong domain type `Output`.
 ///
 /// `Service` supports a number of calling styles (async function, completion block),
 /// and more can be added either in the library, or by clients as necessary (such as a combine
@@ -15,11 +18,11 @@
 /// ```
 ///
 /// To implement a concrete service, the convention is to provide a static function to build it
-/// from `URLServiceProviding`:
+/// from `ServiceContext`:
 ///
 /// ```
 /// extension GetAwayService {
-///     static func getAwayService(_ provider: URLServiceProviding<CommonURLContext>) -> Self { … }
+///     static func getAwayService(_ provider: ServiceContext) -> Self { … }
 /// ```
 ///
 /// To depend on a concrete service add a property for it in a unit and let it be injected:
@@ -29,7 +32,10 @@
 ///     let getAwayService: GetAwayService
 ///     let shootOutService: ShootOutService
 ///
-///     init(getAwayService: GetawayService, shootOutService: ShootOutService) {
+///     init(
+///         getAwayService: GetawayService,
+///         shootOutService: ShootOutService
+///     ) {
 ///         self.getAwayService = getAwayService
 ///         self.shootOutService = shootOutService
 ///     }
@@ -37,6 +43,7 @@
 /// ```
 ///
 public struct Service<Input, Output> {
+
     let implementation: (Input) async -> Output
 
     /// Retrieve a response from the service.
@@ -70,6 +77,7 @@ extension Service {
 // MARK: -
 
 public extension Service {
+
     /// Call the service as an async function
     ///
     /// - Parameter input: Input value to pass to the service.

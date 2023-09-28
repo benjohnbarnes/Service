@@ -1,6 +1,6 @@
 import Foundation
 
-/// Implementation of `ServiceProvider` to allow service creation functions to be unit tested.
+/// Implementation of `ServiceContext` letting service creation functions be unit tested.
 ///
 public final class MockServiceContext: ServiceContext {
 
