@@ -15,10 +15,10 @@ public typealias GreetingService = Service<String, Result<String, Error>>
 ///
 public extension GreetingService {
 
-    /// Build a `GreetingService` from `some ServiceProviding`.
+    /// Build a `GreetingService` from `some ServiceContext`.
     ///
     /// This can be used directly in a unit test, or it can be used in a module instance to build
-    /// service to inject in to units. By providing an appropriate `ServiceProviding` implementation
+    /// service to inject in to units. By providing an appropriate `ServiceContext` implementation
     /// the services built can be mocked, stubbed, or pointed to real production services. Adjusting
     /// the implementation's properties allows alternative server environments to be used, etc.
     /// 

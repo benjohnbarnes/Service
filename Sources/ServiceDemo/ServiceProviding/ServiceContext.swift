@@ -7,10 +7,10 @@ import Foundation
 /// specific protocol for use in your projects.
 ///
 /// It would be expected that related modules will share a common interface similar
-/// in intent (but not not necessarily detail) to this `ServiceProviding` interface.
+/// in intent (but not not necessarily detail) to this `ServiceContext` interface.
 /// Instances of services in your modules would be built from this common interface.
 ///
-/// An interface like `ServiceProviding` provides a convenient point to store such
+/// An interface like `ServiceContext` provides a convenient point to store such
 /// details as:
 ///
 /// * A base URL at which services are mounted.
@@ -20,7 +20,7 @@ import Foundation
 /// * An instrumentation or logging interface to which services might report parse
 /// errors.
 ///
-/// Modules should be arranged to build their units from the injected `ServiceProviding`
+/// Modules should be arranged to build their units from the injected `ServiceContext`
 /// like interface. See `GreetingModule`. This provides a capability to:
 ///
 /// * Inject a real instance in to modules so real production services are built.
@@ -30,16 +30,16 @@ import Foundation
 /// stub files for specific scenarios.
 ///
 /// Similarly, in a larger application, many modules might be injected with the same
-/// `ServiceProviding` like instance. This allows the entire app be run from stubbed
+/// `ServiceContext` like instance. This allows the entire app be run from stubbed
 /// files if wished. It makes it easy to adjust global details shared between the Apps
 /// services.
 ///
 /// --
 ///
-/// A mock implementation of your `ServiceProviding` interface can be used to let
+/// A mock implementation of your `ServiceContext` interface can be used to let
 /// service creation functions be unit tests. See `GreetingServiceDefinitionTests`.
 ///
-/// The example `ServiceProviding` interface used in this module is simple, but hopefully
+/// The example `ServiceContext` interface used in this module is simple, but hopefully
 /// proves the point!
 ///
 /// Keep in mind that the approach used here is just a guide and other options are

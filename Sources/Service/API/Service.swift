@@ -67,8 +67,6 @@ extension Service {
     ///
     /// - Parameter implementation: The function implementing the service.
     ///
-    /// See `URLServiceProvider<Context>` for the preferred way to create services.
-    ///
     public init(_ implementation: @escaping (Input) async -> Output) {
         self.implementation = implementation
     }

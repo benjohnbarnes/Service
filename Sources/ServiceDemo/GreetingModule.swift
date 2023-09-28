@@ -1,17 +1,17 @@
 import Service
 
-/// A super trivial example feature module which will create its units from the `ServiceProviding` it is
+/// A super trivial example feature module which will create its units from the `ServiceContext` it is
 /// given.
 ///
 public struct GreetingModule {
 
-    private let serviceProvider: any ServiceContext
+    private let serviceContext: any ServiceContext
 
-    /// This module needs a `ServiceProviding` to build services from. The implementation could be real,
+    /// This module needs a `ServiceContext` to build services from. The implementation could be real,
     /// or something providing services with stub data to return.
     ///
-    public init(serviceProvider: ServiceContext) {
-        self.serviceProvider = serviceProvider
+    public init(serviceContext: ServiceContext) {
+        self.serviceContext = serviceContext
     }
 
     /// Build the module's main feature.
@@ -22,9 +22,11 @@ public struct GreetingModule {
     func greetingFeature() -> GreetingUnit {
         // Build the unit, providing it with a service instance built by the factory.
         GreetingUnit(
-            // Build service for the greeting unit from `serviceProvider`. The ergonomics of this are
-            // very nice because Xcode can find any methods able to build the service instance.
-            greetingService: .greetingService(in: serviceProvider)
+            // Build service for the greeting unit from `serviceContext`. The ergonomics of this are
+            // nice because Xcode will suggest autocomplete factory methods in the required service's
+            // nominal type.
+            //
+            greetingService: .greetingService(in: serviceContext)
         )
     }
 }

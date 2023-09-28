@@ -178,12 +178,12 @@ import Catalogue
 import Service
 
 public struct CatalogueModule {
-	let serviceProvider: any URLServiceProviding<CommonServiceContext>
+	let serviceContext: any ServiceContext
 
 	func catalogueView() -> some View {
 		CatalogueView(model: CatalogueSearchModel(
 			// The service is created and injected in to the unit here:
-			catalogueSearch: .catalogueSearch(using: serviceProvider)
+			catalogueSearch: .catalogueSearch(in: serviceContext)
 		))
 	}
 }
@@ -204,20 +204,20 @@ The `Context` lets these to be cleanly injected in to service definitions withou
 
 ## Multiple environments & global service stubbing
 
-`CatalogueModule` lets any `URLServiceProviding<CommonServiceContext>` type be injected. 
+`CatalogueModule` lets any `URLServiceContext<CommonServiceContext>` type be injected. 
 
-The shared `CommonServiceContext` type should include a mechanism mapping from service paths to URLs. With this, an integrating module can redirect its resources to specific environments, such as staging and production. The environment in use is opaque to modules making use of services. By injecting a `URLServiceProvider<CommonServiceContext>` implementation in to the module it will build "real" endpoints that access the API over the network using a `URLSession`.  
+The shared `CommonServiceContext` type should include a mechanism mapping from service paths to URLs. With this, an integrating module can redirect its resources to specific environments, such as staging and production. The environment in use is opaque to modules making use of services. By injecting a `ServiceContext` implementation in to the module it will build "real" endpoints that access the API over the network using a `URLSession`.  
 
-The `URLServiceProviding` dependency of `CatalogueModule` also let other conforming types be injected. This lets the integrating application inject a stubbing implementation. The services are built from this they will instead use potted data from local JSON files, use a local database, or even run ad-hoc code. The approach scales to a whole App letting it run entirely against local stubbed services under various usage scenarios.
+The `URLServiceContext` dependency of `CatalogueModule` also let other conforming types be injected. This lets the integrating application inject a stubbing implementation. The services are built from this they will instead use potted data from local JSON files, use a local database, or even run ad-hoc code. The approach scales to a whole App letting it run entirely against local stubbed services under various usage scenarios.
 
-Building services in modules from an injected `URLServiceProviding` provides CB 6.
+Building services in modules from an injected `URLServiceContext` provides CB 6.
 
 
 # Anticipated Questions
 
 ### What about if I integrate services that expect more than one kind of `Context`?
 
-In this case your top level composition root should have `URLServiceProviding` instances for each kind of context in use. It is hoped that individual modules should settle on a single `Context` type, and generally, it is beneficial for larger groups of modules to share a single `Context` type. However, if a module does use services built from different `Context` types, this can be readily accommodated.
+In this case your top level composition root should have `URLServiceContext` instances for each kind of context in use. It is hoped that individual modules should settle on a single `Context` type, and generally, it is beneficial for larger groups of modules to share a single `Context` type. However, if a module does use services built from different `Context` types, this can be readily accommodated.
 
 ### How do I bump the shared `Context`?
 
@@ -227,5 +227,5 @@ There may be benefits in using `protocol`s to support extra capabilities that _s
 
 ### Are non HTTP(S) service supported?
 
-Yes. There's no particular reason to only build services using `URLSession`. Other service implementations can be supported. This would suggest the development of another interface similar to `URLServiceProviding`. `static` functions to provide service implementations would then take this new type.
+Yes. There's no particular reason to only build services using `URLSession`. Other service implementations can be supported. This would suggest the development of another interface similar to `URLServiceContext`. `static` functions to provide service implementations would then take this new type.
 
