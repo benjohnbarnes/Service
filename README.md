@@ -21,7 +21,9 @@ In your module that provides one or more services, define services like this:
 public typealias VehicleTaxService = Service<VehicleNumberPlate, Result<VehicleTaxDetails, Error>>
 ```
 
-You should model the `Input` and `Output` domains with strong types appropriate to the service. Much of the value of a service is how it **defines the language used to interact with it**.
+You should model the `Input` and `Output` domains with strong types appropriate to the service. Much of the value of a service is how it can use types to **defines the language clients use to interact with it**.
+
+In this case the service `Output` is a Swift `Result` with a generic `Error`. A service is free to have any `Output` type. If using a `Result` you might want to provide a specific `Error` type better informing call sites about the potential faulure cases they must handle.
 
 ### Use a `Service`
 
