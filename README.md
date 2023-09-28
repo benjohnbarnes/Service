@@ -1,10 +1,10 @@
-Thanks for taking a look. Just so you know, Service is currently work in progress. The code seems pretty much there but the documentation is still being worked on.
+Thanks for taking a look. So you know, Service is currently work in progress. The code seems pretty much there but the documentation is being worked on.
 
 # What even is this?
 
-Service is an teeny, tiny, hardly worth it library with a generic type `Service<Intput, Output>` that is little more than a wrapper around an `async` function.
+Service is an teeny, tiny, hardly worth it library with a generic type `Service<Intput, Output>` that is really just a "Named Type" wrapper around an `async` function.
 
-Why am I wasting your time with it? 
+Why am I wasting your time with it?! 
 
 The quick gist is **Service provides a pattern to help you organise very valuable chunks of your code in a highly reusable and testable way.** That's the sales pitch. I try to justify that in more depth [separately](/README2.md).
 
@@ -15,21 +15,21 @@ There's a `ServiceDemo` folder in the project that uses Service and the patterns
 
 ### Define a `Service`
 
-In your module providing services define them like this:
+In modules providing services, define them like this:
 
 ```swift
 public typealias VehicleTaxService = Service<VehicleNumberPlate, Result<VehicleTaxDetails, Error>>
 ```
 
-> As mentioned, `Service` is little more than an async function wrapper. However, the `typealias` creates a named or "Nominal Type". In Swift this has beneficial ergonomics over its wrapped but un-named function type. Specifically, we can `extend` the named type and provide a factory function to implement it. 
+This provides your service with a "Nominal Type". Nominal, or "Named" types, brings beneficial Swift ergonomics such being as able to `extend` the named type with a `static` factory function that will autocomplete. Mmmmm. Nice!
 
-You should model the `Input` and `Output` domains with strong types appropriate to the service. Much of the value of a service is how it can use types to **defines the language clients use to interact with it**.
+You should model the `Input` and `Output` domains with strong types appropriate to the service. Much of the value of a service is how it can use types to **define the language clients use to interact with it**.
 
-In this case the service `Output` is a Swift `Result` with a generic `Error`. A service is free to have any `Output` type. If using a `Result` you might want to provide a specific `Error` type better informing call sites about the potential faulure cases they must handle.
+In this example, the service `Output` is a Swift `Result` with a generic `Error`. A service is free to have any `Output` type. For services returning a `Result` consider also having a service specific `Error` type that informs call sites about the precise failure scenarios they must handle.
 
 ### Use a `Service`
 
-Even before `VehicleTaxService` has an implementation, we can **build and test** units that consume it:
+Even before `VehicleTaxService` has an implementation, we can **implement and test** units that consume it:
 
 ```
 import VehicleTax
@@ -45,7 +45,7 @@ final class VehicleTaxModel: ObservableObject {
 }
 ```
 
-Using `MockService` we can write unit tests of `VehicleTaxModel`. These tests use the domain types `VehicleNumberPlate` and `VehicleTaxDetails`. This keeps them completely decoupled from network details such as response encoding or request headers. The tests are compact, clear, and less likely to need rework if the network details change. The tests can be written without even working out the details of requests and responses.
+Using `VehicleTaxService.Mock` we can write unit tests of `VehicleTaxModel`. These tests use the domain types `VehicleNumberPlate` and `VehicleTaxDetails`. This keeps them completely decoupled from network details such as response encoding or request headers. The tests are compact, clear, and unlikely to need rework if the network details evolve. The tests can be written before fully knowing the network API details of requests and responses.
 
 ### Implement a `Service` following the Service creation pattern
 
