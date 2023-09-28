@@ -1,231 +1,123 @@
-# Service – the Claimed Benefits [CBs!]
+Thanks for taking a look. Just so you know, Service is currently work in progress. The code seems pretty much there but the documentation is still being worked on.
 
-Service helps you introduce a pattern which claims these benefits: 
+# What even is this?
 
-1. Support significant code reuse.
-2. Increase benefits and reduce need for cross team collaborations / alignment.
-3. Improve testability of service implementations.
-4. Improve testability of service consumers.
-5. Avoid costly inconsistencies between systems.
-6. Allow easy reconfiguration of systems to use different backend environments or stubs.
+Service is an teeny, tiny, hardly worth it library with a generic type `Service<Intput, Output>` that is little more than a wrapper around an `async` function.
 
-I'll try to justify these tall claims as you read on…
+Why am I wasting your time with it? 
 
-# What does Service provide?
+The quick gist is **Service provides a pattern to help you organise very valuable chunks of your code in a highly reusable and testable way.** That's the sales pitch. I try to justify that in more depth [separately](/README2.md).
 
-Service provides very little! 
 
-It is a Swift package providing abstractions and implementations to let URL services be defined in a uniform manner such that:
+# How do I use Service?
 
-* They are very easy to reuse and share among modules.
-* Service implementations can be tested comprehensively, clearly and concisely.
-* Units consuming services can be tested comprehensively, clearly and concisely.
-* The service interface exposes only things clients care about and hides everything they don't.
-* Systems using services can replace them, at a single high level point, to target different backend environments, entirely stub them, or satisfy other scenarios.
-* Service use and implementation has nice Swift ergonomics.
+There's a `ServiceDemo` folder in the project that uses Service and the patterns you're suggested to follow. I'll give an overview here.
 
-Nothing Service provides is clever or involved. However, Service's design has gone through quite a lot of iteration to find an approach most likely to achieve the design goals of shared services with strong testability & good ergonomics.
+### Define a `Service`
 
-# So what is a "service"?
-
-This library considers a service to be an "opaque box" that takes a strongly typed `Input` argument, performs some impure activity with it (probably involving an external system over HTTPS), and finally returns some typed `Output` argument. Service gives clients flexibility in how they call a service, but out of the box provides an async function and a callback interface. Combine support is simple to add.
-
-**The fundamental idea is that this kind of box is a _"Really Good ™"_ abstraction and either directly provides or enables each of the CBs.**
-
-There are three important view points of a `Service` box.
-
-## Client view point of a `Service`
-
-Clients view a `Service` as just a function they have been given. You give it an `Input` and later, it asynchronously returns an `Output`. All they care about are its two domain types: `Input` and `Output`. These are both as isolated from implementation details as is appropriate for the service in question. 
-
-Because a `Service` is, externally, **just a function**, client behaviour can be unit tested merely by checking they call services passing the correct `Input` and take appropriate action on receiving consequent `Output`. The implementation and the testing are oblivious of all network level concerns. 
-
-## Implementation view point of a `Service`
-
-Service implementations know about backend details such as whether HTTP and REST are being used. Assuming they are:
-
-* The implementation knows how to **prepare a request**. It knows necessary headers, URL query parameters, HTTP verbs, authorisation mechanisms, and any data payload to send. The implementation knows how to prepare this request based on the `Input` type, along with any other shared `Context` that is necessary. 
-* The implementation also knows how to **parse a response**. It knows about response headers to check, the meaning of the return code, how to parse a payload, how to report errors it encounters and perhaps recover from them.
-
-The implementation is all about taking the `Service`'s `Input` domain, doing sensible stuff with a network, then taking the network's response, and turning that back in to some kind of `Output`.
-
-`Service` implementations live on the shores of the network layer sea and act as a conduit from their `Input` to their `Output` via the network.
-
-We can fully test service implementations by ensuring:
-* Given an `Input` they ask the network the right question.
-* Given a network response, they produce the appropriate `Output`.
-
-## Integrator view point of a `Service`
-
-An integrator wants to instantiate units that expect various `Service` types. It doesn't care what a `Service` does or how it works. It just needs a way to get services and to inject where they are required. An Integrator is happy if, given some sort of generic facility, they can ergonomically obtain instances of services for their units. They'd like to be able to have high level control of that facility so that all services can be pointed at a different backend environment, or entirely replaced with stubbed out scenarios that read from files.
-
-## A motivating example
-
-Here's an example of a search service exposed by a "Catalogue" module for use by its clients.
+In your module that provides one or more services, define services like this:
 
 ```swift
-import Service
-public typealias CatalogueSearchService = 
-    Service<[ItemQuery], Result<[ItemResult], CatalogueError>>
+public typealias VehicleTaxService = Service<VehicleNumberPlate, Result<VehicleTaxDetails, Error>>
 ```
 
-> A quick tip – some services don't need any input parameters. You can define them as `Service<Void, InterestingOutput>` 
+You should model the `Input` and `Output` domains with strong types appropriate to the service. Much of the value of a service is how it **defines the language used to interact with it**.
 
-Note: no implementation is provided (yet) for this service. That's fine because clients don't and can't care about implementation details! Even with no implementation at all, or API to talk to, the service declaration lets us build and test client modules.
+### Use a `Service`
 
-A unit using Catalogue module's search might look like this:
+Even before `VehicleTaxService` has an implementation, we can **build and test** units that consume it:
 
-```swift
-import Service
-import Catalogue
+```
+import VehicleTax
 
-final class CatalogueSearchModel: ObservableObject {
-	let catalogueSearch: CatalogueSearchService
-	@Published var state: ModelState = .initial
-	
-	func search(items: CatalogueItems) async {
-		// While the service runs, be in the `.loading` state.
-		modelState = .loading
-		
-		// `catalogueSearch` service is invoked here. Note it is 
-		// called with a domain object and we utilise its domain 
-		// object response. The interface looks like any other
-		// async function. When it completes, transition to the
-		// `.loaded` state with the successful or failed `Result`.
-		modelState = .loaded(await catalogueSearch(items))
-	}
-	
-	var isLoading: Bool { state == .loading }
- 
-    var viewData: ViewData {
-        // Perform mapping from `state` property here.
+final class VehicleTaxModel: ObservableObject {
+    let fetchVehicleDetails: VehicleTaxService
+    @Observable var modelState: ModelState = .initial
+
+    func load(vehicle: VehicleNumberPlate) async {
+        modelState = .loading
+        modelState = await .loaded(fetchVehicleDetails(vehicle))
     }
-} 
+}
 ```
 
-The example shows how the external interface of a service is simple and guides consuming units to use the domain `Input` and `Output` types.
+Using `MockService` we can write unit tests of `VehicleTaxModel`. These tests use the domain types `VehicleNumberPlate` and `VehicleTaxDetails`. This keeps them completely decoupled from network details such as response encoding or request headers. The tests are compact, clear, and less likely to need rework if the network details change. The tests can be written without even working out the details of requests and responses.
 
-In tests of `CatalogueSearchModel` Service provides easy to use and consistent stubs of `CatalogueSearchService`. We can start testing `CatalogueSearchModel` as soon as the service's `Input` and `Output` types are defined, before an implementation is available.
+### Implement a `Service` following the Service creation pattern
 
-A test might look like this:
+The "VehicleTax" team have finished working out the network API and request / response encoding, headers, return codes, and all that stuff. So we can provide an implementation of `VehicleTaxService` now.
+
+A service implementation is provided like this. **You are strongly encouraged to follow this pattern**. Add a `static func` as an `extension` of your `Service` type that builds a service implementation from a passed in `ServiceContext`. 
+
+NB: The details of your `ServiceContext` and how the function works may be completely different. 
 
 ```swift
-import Service
-import Catalogue
+public extension VehicleTaxService {
+    static func vehicleService(in context: some ServiceContext) -> Self {
+        Service { vehiclePlate in
+            let url = context.baseURL
+                .appending(path: "taxService")
+                .appending(path: vehiclePlate.registration)
 
-final class CatalogueSearchModelTest: XCTestCase {
-	let mockSearchService = CatalogueSearchService.Mock(stubOutput: .success([]))	
-	lazy var subject = CatalogueSearchModel(catalogueSearch: mockSearchService)
-	
-	func test_serachItems_stateIsLoadingDuringSearch() async {
-        mockSearchService.validationHook = { [subject]
-        	XCTAssertTrue(subject.isLoading)
+            let request = URLRequest(url: url)
+            let result = await context.perform(request: request)
+
+            return Result {
+                let (data, _) = try result.get()
+                let dto = try JSONDecoder().decode(VehicleTaxDetailsDTO.self, from: data)
+                return try VehicleTaxDetails(dto)
+            }
         }
-
-        try await subject.search(items: [.testItem])
-	}
+    }
 }
-```
+``` 
 
-# Justifying CBs 1-5
+### What is this `ServiceContext`?
 
-Having seen an example service, how does this approach unlock the wild "claimed benefits" (CBs)?
+`ServiceContext` is a protocol you will define. It encapsulates the common details your service creation function need. It will be determined by the way your modules perform requests. 
 
-## Declared type & encapsulated implementation
+A `ServiceContext` would frequently provide:
 
-A service type is declared with `Input` and `Output` domain types. These types are the result of client engineers embedding their understanding of the service's API in to Swift's type system. Reaching this understanding may have needed substantial research and perhaps asking / aligning with the API team.
+* A mechanism to build a full service `URL` from a service path.
+* A mechanism to perform a `URLRequest`.
 
-If an API is a co-designed collaboration between the Swift engineers and API engineers, the service's declaration captures this alignment and co-design effort. As such, **a service declaration is often a reusable embodiment of considerable embedded effort**. It literally packages up engineer time and effort in to a form which can be rapidly integrated by other teams, with much less need for new teams to understand the service's API or the design decisions informing it.
+A `ServiceContext` could also include:
 
-A service will generally be implemented by building a `URLRequest` from the `Input` type and dispatching this to an API. It will then parse the API's response and handle errors, and provide some service `Output` type. While these two phases are often not complex, they frequently have many small and subtle facts that must be properly handled for the API to behave correctly and consistently. Once again, the exact details of all of this can require considerable discussion and alignment between client and API engineering teams, and also substantial engineer time. **A service implementation encapsulates this effort and makes correctness reusable, providing consistency.**
+* An system to obtain an authentication token for requests.
+* A way to report parsing errors in responses from the backend.
 
-The service type declaration and its implementation provides CBs 1, 2 & 5.
+But these possibilities are just suggestions. 
 
-## Encapsulated tests & validation
+An existing project's services may already have an established shared context. This may already be usable if you want to adopt the Service creation pattern.
 
-Service implementations should be tested, including any subtleties of creating a request or parsing. Good coverage of failure cases should be included. Understanding edge cases is often a result of significant engineering work and might additionally require careful alignment between client and API teams. This is an investment that should be shared and reused among modules. Service inherently supports reuse of tests because when a `Service` is encapsulated, so are its tests.
+You should try to have one, or a small number of `ServiceContext` like interfaces (and their implementations). The intent is that groups of related modules will share this interface. However, there is no harm if some services follow a different approach and need their own `ServiceContext`.
 
-Encapsulated tests provides CBs 3 & 5.
+It is important that `ServiceContext` is a protocol and not a fixed type. `.vehicleService` is oblivious to the specific `ServiceContext` implementation it is given. By providing appropriate implementations, we can exercise `vehicleService` (and all other service creation functions) in specific important ways:
 
-## Free Mocks
-
-The Service library automatically provides each `Service` with a consistent mock implementation for testing the correct behaviour of units. The mock can be used before a `Service` has an implementation, a backend exists, or mock JSON is available. Units using a `Service` are tested in the domain the the `Service` (its `Input` and `Output`), and not in the REST domain that includes details such as service JSON encoding and HTTP niceties.
-
-Modules that define services can also provide test domain data for stubbing so that integrating units can ensure they properly handle all cases a service can provide. Test data is in the domain of the service and not at the REST level.
-
-The availability of free mocks supporting standard test data covers CBs 4 & 5.
-
-## Avoidance of inconsistency
-
-When service implementations are needed in several places and can't be reused, they are instead reimplemented.
-
-Reimplementation leads to a very high likely-hood of **inconsistencies such as divergent edge case handling**.
-
-Inconsistency has pernicious, ongoing and often enormously expensive consequences. It can impact everyone developing and using a system. Consider how many meetings are about trying to resolve differing live approaches and how difficult these can be to harmonise.
-
-Making services easily reusable provides CB 5.
+* A mock `ServiceContext` lets us exhaustively test the `.vehicleService` implementation without the actual network API existing yet.
+* A stubbing `ServiceContext` lets us point all services at potted local response data. This supports easy testing of the integrated system without hitting a real API (or the API existing yet). 
+* Finally, once network API environments are available, we can pass in a "real" `ServiceContext` and build real network services pointing at the different environments.
 
 
-# Injecting Services
+### Integrate `Service`s
 
-Justifying CB 6, that Service makes it easy for an integrating system to reconfigure services or use stubs, needs the motivating example to be extended.
-
-We'll extend the "CatalogueUI" module which is the home of `CatalogueSearchModel` to include a `CatalogueModule` instance which can build a view for us:
+To get the greatest benefit from the `ServiceContext` creation pattern it is suggested that you use a "Module" pattern. For some module, define a `Module` type that is injected with the stuff it needs to plumb together the module's' units to provide features.
 
 ```swift
-import Common
-import Catalogue
 import Service
+import VehicleTax
 
-public struct CatalogueModule {
-	let serviceProvider: any URLServiceProviding<CommonServiceContext>
+struct VehicleModule {
+    // A module could have various other dependencies here.
+    let serviceContext: ServiceContext
 
-	func catalogueView() -> some View {
-		CatalogueView(model: CatalogueSearchModel(
-			// The service is created and injected in to the unit here:
-			catalogueSearch: .catalogueSearch(using: serviceProvider)
-		))
-	}
+    public func vehicleView(_ vehicle: VehicleNumberPlate) -> VehicleView {
+        let vehicleModel = VehicleTaxModel(
+            fetchVehicleDetails: .vehicleService(in: serviceContext)
+        )
+
+        return VehicleView(model: vehicleModel)
+    }
 }
 ```
-
-## Shared `Context`
-
-A common service context is introduced by the client type `CommonServiceContext`. It is frequently the case that service implementations require additional environmental dependencies. `CommonServiceContext` holds these. Services supports a generic shared `Context` type, rather than defining a specific one.
-
-Examples of the kinds of facilities `Context` is needed for are:
-
-* Mapping from URL service **paths** to an actual URLs that are requested with an HTTPS request. This lets services be targeted at multiple server environments without any involvement of the modules that use them.
-* A transparent authentication mechanism providing tokens to include in service requests. 
-* A telemetry interface that response parsing errors should be dispatched to.
-* Optional additional headers that client can configure.
-
-The `Context` lets these to be cleanly injected in to service definitions without looking for thiem in globals, or needing to explicitly pass these dependencies about.
-
-## Multiple environments & global service stubbing
-
-`CatalogueModule` lets any `URLServiceProviding<CommonServiceContext>` type be injected. 
-
-The shared `CommonServiceContext` type should include a mechanism mapping from service paths to URLs. With this, an integrating module can redirect its resources to specific environments, such as staging and production. The environment in use is opaque to modules making use of services. By injecting a `URLServiceProvider<CommonServiceContext>` implementation in to the module it will build "real" endpoints that access the API over the network using a `URLSession`.  
-
-The `URLServiceProviding` dependency of `CatalogueModule` also let other conforming types be injected. This lets the integrating application inject a stubbing implementation. The services are built from this they will instead use potted data from local JSON files, use a local database, or even run ad-hoc code. The approach scales to a whole App letting it run entirely against local stubbed services under various usage scenarios.
-
-Building services in modules from an injected `URLServiceProviding` provides CB 6.
-
-
-# Anticipated Questions
-
-### What about if I integrate services that expect more than one kind of `Context`?
-
-In this case your top level composition root should have `URLServiceProviding` instances for each kind of context in use. It is hoped that individual modules should settle on a single `Context` type, and generally, it is beneficial for larger groups of modules to share a single `Context` type. However, if a module does use services built from different `Context` types, this can be readily accommodated.
-
-### How do I bump the shared `Context`?
-
-The shared `Context` type is likely to be depended on by many libraries for building their endpoints. However, it can still be readily evolved to support new requirements. It is worth taking reasonable efforts to make `Context` changes **Non Breaking**, whenever possible.
-
-There may be benefits in using `protocol`s to support extra capabilities that _some_ services require the `Context` to provide. This will enable just subsystems wishing to instantiate those specific services to obtain a `Context` satisfying the additional requirements and other integrating applications can be left undisturbed. 
-
-### Are non HTTP(S) service supported?
-
-Yes. There's no particular reason to only build services using `URLSession`. Other service implementations can be supported. This would suggest the development of another interface similar to `URLServiceProviding`. `static` functions to provide service implementations would then take this new type.
 
