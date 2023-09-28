@@ -49,7 +49,7 @@ Using `MockService` we can write unit tests of `VehicleTaxModel`. These tests us
 
 The "VehicleTax" team have finished working out the network API and request / response encoding, headers, return codes, and all that stuff. So we can provide an implementation of `VehicleTaxService` now.
 
-A service implementation is provided like this. **You are strongly encouraged to follow this pattern**. Add a `static func` as an `extension` of your `Service` type that builds a service implementation from a passed in `ServiceContext`. 
+A service implementation is provided like this. **You are strongly encouraged to follow this pattern**. Add a `static func` as an `extension` of your `Service` type that builds a an implementation from a passed in `ServiceContext`. 
 
 NB: The details of your `ServiceContext` and how the function works may be completely different. 
 
@@ -74,16 +74,17 @@ public extension VehicleTaxService {
 }
 ``` 
 
-### What is this `ServiceContext`?
 
-`ServiceContext` is a protocol you will define. It encapsulates the common details your service creation function need. It will be determined by the way your modules perform requests. 
+### What is `ServiceContext`?
 
-A `ServiceContext` would frequently provide:
+`ServiceContext` is a protocol you will define. It encapsulates the common details your service creation functions need. It will be determined by the way your modules perform requests. 
+
+`ServiceContext` could frequently provide:
 
 * A mechanism to build a full service `URL` from a service path.
 * A mechanism to perform a `URLRequest`.
 
-A `ServiceContext` could also include:
+`ServiceContext` may also include:
 
 * An system to obtain an authentication token for requests.
 * A way to report parsing errors in responses from the backend.
