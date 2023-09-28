@@ -15,11 +15,13 @@ There's a `ServiceDemo` folder in the project that uses Service and the patterns
 
 ### Define a `Service`
 
-In your module that provides one or more services, define services like this:
+In your module providing services define them like this:
 
 ```swift
 public typealias VehicleTaxService = Service<VehicleNumberPlate, Result<VehicleTaxDetails, Error>>
 ```
+
+> As mentioned, `Service` is little more than an async function wrapper. However, the `typealias` creates a named or "Nominal Type". In Swift this has beneficial ergonomics over its wrapped but un-named function type. Specifically, we can `extend` the named type and provide a factory function to implement it. 
 
 You should model the `Input` and `Output` domains with strong types appropriate to the service. Much of the value of a service is how it can use types to **defines the language clients use to interact with it**.
 
