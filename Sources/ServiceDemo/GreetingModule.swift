@@ -5,12 +5,12 @@ import Service
 ///
 public struct GreetingModule {
 
-    private let serviceProvider: any ServiceProviding
+    private let serviceProvider: any ServiceContext
 
     /// This module needs a `ServiceProviding` to build services from. The implementation could be real,
     /// or something providing services with stub data to return.
     ///
-    public init(serviceProvider: ServiceProviding) {
+    public init(serviceProvider: ServiceContext) {
         self.serviceProvider = serviceProvider
     }
 
@@ -24,7 +24,7 @@ public struct GreetingModule {
         GreetingUnit(
             // Build service for the greeting unit from `serviceProvider`. The ergonomics of this are
             // very nice because Xcode can find any methods able to build the service instance.
-            greetingService: .greeting(using: serviceProvider)
+            greetingService: .greetingService(in: serviceProvider)
         )
     }
 }

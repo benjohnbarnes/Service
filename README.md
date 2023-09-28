@@ -29,7 +29,7 @@ In this example, the service `Output` is a Swift `Result` with a generic `Error`
 
 ### Use a `Service`
 
-Even before `VehicleTaxService` has an implementation, we can **implement and test** units that consume it:
+Even before `VehicleTaxService` has an implementation, we can **implement and test** units that consume it.
 
 ```
 import VehicleTax
@@ -45,15 +45,15 @@ final class VehicleTaxModel: ObservableObject {
 }
 ```
 
-Using `VehicleTaxService.Mock` we can write unit tests of `VehicleTaxModel`. These tests use the domain types `VehicleNumberPlate` and `VehicleTaxDetails`. This keeps them completely decoupled from network details such as response encoding or request headers. The tests are compact, clear, and unlikely to need rework if the network details evolve. The tests can be written before fully knowing the network API details of requests and responses.
+With `VehicleTaxService.Mock` we can write unit tests of `VehicleTaxModel`. These tests use the domain types `VehicleNumberPlate` and `VehicleTaxDetails`. This keeps them completely decoupled from network details such as response encoding or request headers. The tests are compact, clear, and unlikely to need rework if the network details evolve. The tests can be written before fully knowing the network API details for requests and responses.
 
 ### Implement a `Service` following the Service creation pattern
 
 The "VehicleTax" team have finished working out the network API and request / response encoding, headers, return codes, and all that stuff. So we can provide an implementation of `VehicleTaxService` now.
 
-A service implementation is provided like this. **You are strongly encouraged to follow this pattern**. Add a `static func` as an `extension` of your `Service` type that builds a an implementation from a passed in `ServiceContext`. 
+A service implementation is provided like this. **You are strongly encouraged to follow this pattern**. Add a factory function as a `static func` as an `extension` of your `Service`'s named type. The factory function should build the implementation from a passed in `ServiceContext`. 
 
-NB: The details of your `ServiceContext` and how the function works may be completely different. 
+NB: The details of your `ServiceContext` and how your factory functions work can be very different. This is an example. 
 
 ```swift
 public extension VehicleTaxService {
@@ -64,7 +64,7 @@ public extension VehicleTaxService {
                 .appending(path: vehiclePlate.registration)
 
             let request = URLRequest(url: url)
-            let result = await context.perform(request: request)
+            let result = await context.perform(request)
 
             return Result {
                 let (data, _) = try result.get()
@@ -79,12 +79,12 @@ public extension VehicleTaxService {
 
 ### What is `ServiceContext`?
 
-`ServiceContext` is a protocol you will define. It encapsulates the common details your service creation functions need. It will be determined by the way your modules perform requests. 
+`ServiceContext` is a protocol you will define. It encapsulates the common details your service creation functions need. Exactly what the protocol requires will be determined by the way your modules perform requests.
 
-`ServiceContext` could frequently provide:
+`ServiceContext` might frequently provide:
 
-* A mechanism to build a full service `URL` from a service path.
-* A mechanism to perform a `URLRequest`.
+* A mechanism to build a complete service `URL` from just a service path (see `context.baseURL.appending(path: "taxService")`).
+* A mechanism to perform a `URLRequest` (see `context.perform(request)`).
 
 `ServiceContext` may also include:
 

@@ -2,7 +2,7 @@ import Foundation
 
 /// Implementation of `ServiceProvider` to allow service creation functions to be unit tested.
 ///
-public final class MockServiceProvider: ServiceProviding {
+public final class MockServiceContext: ServiceContext {
 
     public var baseURL: URL
 
@@ -17,7 +17,7 @@ public final class MockServiceProvider: ServiceProviding {
         self.stubResult = stubResult
     }
 
-    public func perform(request: URLRequest) async -> URLResult {
+    public func perform(_ request: URLRequest) async -> URLResult {
         spyRequest = request
         return stubResult
     }

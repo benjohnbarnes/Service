@@ -47,13 +47,13 @@ import Foundation
 /// or need not be exposed. Whatever suits building your services, testing them, and
 /// letting them be replaces by stubs, is appropriate.
 ///
-public protocol ServiceProviding {
+public protocol ServiceContext {
 
     /// Base URL at which services are located.
     var baseURL: URL { get }
 
     /// Perform a URLRequest and await the result.
-    func perform(request: URLRequest) async -> URLResult
+    func perform(_ request: URLRequest) async -> URLResult
 
     // Other features could be provided here such as an authentication mechanism or parse error
     // reporting.

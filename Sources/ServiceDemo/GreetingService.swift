@@ -22,14 +22,14 @@ public extension GreetingService {
     /// the services built can be mocked, stubbed, or pointed to real production services. Adjusting
     /// the implementation's properties allows alternative server environments to be used, etc.
     /// 
-    static func greeting(using provider: some ServiceProviding) -> Self {
+    static func greetingService(in context: some ServiceContext) -> Self {
         Service { input in
-            let url = provider.baseURL
+            let url = context.baseURL
                 .appending(path: "greeting")
                 .appending(path: input)
 
             let request = URLRequest(url: url)
-            let result = await provider.perform(request: request)
+            let result = await context.perform(request)
 
             return Result {
                 let (data, _) = try result.get()
