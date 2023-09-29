@@ -1,34 +1,32 @@
 
-/// An concrete interface to consume a service.
+/// `Service` is basically a "Nominal Type" wrapper for an async function. This is useful
+/// because Swift lets a nominal type have an `extension` which can contain a `static` factory
+/// function. These have great autocompletion ergonomics and discoverability.
 ///
-/// `Service` wraps an async function and gives it a "nominal type". This is useful because
-/// Swift lets a nominal type be extended with a static factory function and provides ergonomic
-/// autocompletion of the function name.
-///
-/// A `Service` takes a strong domain type `Input` and returns a strong domain type `Output`.
+/// A `Service` takes a strong domain `Input` and returns a strong domain `Output`.
 ///
 /// `Service` supports a number of calling styles (async function, completion block),
-/// and more can be added either in the library, or by clients as necessary (such as a combine
+/// and more can be added either in Service, or by clients as necessary (such as a combine
 /// publisher or Promise).
 ///
-/// To specify a concrete service type, use a type alias:
+/// To specify a concrete service type, use a `typealias`:
 ///
 /// ```
 /// typealias GetAwayService = Service<Set<LootBag>, Result<[ChaseEvents], FilmingError>>
 /// ```
 ///
-/// To implement a concrete service, the convention is to provide a static function to build it
-/// from `ServiceContext`:
+/// To implement a concrete service, provide a static function to build it from a
+/// `ServiceContext`:
 ///
 /// ```
-/// extension GetAwayService {
-///     static func getAwayService(_ provider: ServiceContext) -> Self { … }
+/// public extension GetAwayService {
+///     static func getAwayService(in context: ServiceContext) -> Self { … }
 /// ```
 ///
-/// To depend on a concrete service add a property for it in a unit and let it be injected:
+/// To depend on a concrete service, add a property for it in a unit and let it be injected:
 ///
 /// ```
-/// struct HeistUnit {
+/// struct HeistHeistModel {
 ///     let getAwayService: GetAwayService
 ///     let shootOutService: ShootOutService
 ///
@@ -38,6 +36,24 @@
 ///     ) {
 ///         self.getAwayService = getAwayService
 ///         self.shootOutService = shootOutService
+///     }
+/// }
+/// ```
+///
+/// To provide a unit a concrete service, get yourself injected with the the `ServiceContext`
+/// and build the unit's service from that:
+///
+/// ```
+/// struct CaperMovieModule {
+///     let serviceContext: ServiceContext
+///
+///     func heistScene() -> some Scene {
+///         let heistModel = HeistModel(
+///             getAwayService: .getAwayService(in: serviceContext),
+///             shootOutService: .shootOutService(in: serviceContext)
+///         )
+///
+///         return HeistScene(model: heistModel)
 ///     }
 /// }
 /// ```
