@@ -3,7 +3,7 @@ import Foundation
 /// Implementation of `ServiceContext` for production use. Actually sends `URLRequest`s to
 /// a `URLSession`
 ///
-public struct LiveServiceContext: ServiceContext {
+public struct URLSessionServiceContext: ServiceContext {
 
     let session: URLSession
     public let baseURL: URL

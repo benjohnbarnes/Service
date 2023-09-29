@@ -79,17 +79,17 @@ public extension VehicleTaxService {
 
 ### What is `ServiceContext`?
 
-`ServiceContext` is a protocol you will define. It encapsulates the common details your service creation functions need. Exactly what the protocol requires will be determined by the way your modules perform requests.
+`ServiceContext` is a protocol you will define. It encapsulates the common details your service creation functions need. Exactly what the protocol provides is determined by the way your modules perform requests.
 
 `ServiceContext` might frequently provide:
 
 * A mechanism to build a complete service `URL` from just a service path (see `context.baseURL.appending(path: "taxService")`).
 * A mechanism to perform a `URLRequest` (see `context.perform(request)`).
 
-`ServiceContext` may also include:
+`ServiceContext` could also provide:
 
-* An system to obtain an authentication token for requests.
-* A way to report parsing errors in responses from the backend.
+* A system to obtain an authentication token for requests.
+* A way to report parsing errors in the backend's responses.
 
 But these possibilities are just suggestions. 
 

@@ -3,7 +3,7 @@ import Foundation
 /// Implementation of `ServiceContext` to let modules be used with stubbed services. These
 /// might read from a folder of local files that simulate some specific testing scenario.
 /// 
-public final class StubServiceContext: ServiceContext {
+public final class StubbingServiceContext: ServiceContext {
 
     public var baseURL: URL
     var stubResults: [URL: URLResult]
