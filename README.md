@@ -53,7 +53,7 @@ The "VehicleTax" team have finished working out the network API and request / re
 
 A service implementation is provided like this. **You are strongly encouraged to follow this pattern**. Add a factory function as a `static func` as an `extension` of your `Service`'s named type. The factory function should build the implementation from a passed in `ServiceContext`. 
 
-NB: The details of **your** `ServiceContext` and how your factory functions could be very different. But here is an example:
+NB: The details of **your** `ServiceContext` and how your factory functions work could be very different. But here is an example:
 
 ```swift
 public extension VehicleTaxService {
