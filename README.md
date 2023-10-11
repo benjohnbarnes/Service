@@ -31,7 +31,7 @@ In this example, the service `Output` is a Swift `Result` with a generic `Error`
 
 Even before `VehicleTaxService` has an implementation, we can **implement and test** units that consume it.
 
-```
+```swift
 import VehicleTax
 
 final class VehicleTaxModel: ObservableObject {
