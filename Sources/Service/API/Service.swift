@@ -3,38 +3,41 @@
 /// because Swift lets a nominal type have an `extension` which can contain a `static` factory
 /// function. These have great autocompletion ergonomics and discoverability.
 ///
-/// A `Service` takes a strong domain `Input` and returns a strong domain `Output`.
+/// A `Service` takes a strong domain `Input` and returns a strong domain `Output`. By "Domain",
+/// I mean a type that is relevant to a user of a service. The `Input` is what they pass to the
+/// service, and the `Output` is what they receive in response.
 ///
-/// `Service` supports a number of calling styles (async function, completion block),
-/// and more can be added either in Service, or by clients as necessary (such as a combine
-/// publisher or Promise).
+/// `Service` supports a number of calling styles (async function, completion block), and more
+/// can be added either in Service, or by clients as necessary (such as a combine publisher or
+/// Promise).
 ///
 /// To specify a concrete service type, use a `typealias`:
 ///
 /// ```
-/// typealias GetAwayService = Service<Set<LootBag>, Result<[ChaseEvents], FilmingError>>
+/// typealias GetawayService = Service<Set<LootBag>, Result<[ChaseEvents], FilmingError>>
 /// ```
 ///
 /// To implement a concrete service, provide a static function to build it from a
 /// `ServiceContext`:
 ///
 /// ```
-/// public extension GetAwayService {
-///     static func getAwayService(in context: ServiceContext) -> Self { … }
+/// public extension GetawayService {
+///     static func GetawayService(in context: ServiceContext) -> Self { … }
 /// ```
 ///
-/// To depend on a concrete service, add a property for it in a unit and let it be injected:
+/// To depend on a concrete service, add a property for it in a unit and set up `init`
+/// injection:
 ///
 /// ```
-/// struct HeistHeistModel {
-///     let getAwayService: GetAwayService
+/// struct HeistModel {
+///     let getawayService: GetawayService
 ///     let shootOutService: ShootOutService
 ///
 ///     init(
-///         getAwayService: GetawayService,
+///         getawayService: GetawayService,
 ///         shootOutService: ShootOutService
 ///     ) {
-///         self.getAwayService = getAwayService
+///         self.getawayService = getawayService
 ///         self.shootOutService = shootOutService
 ///     }
 /// }
@@ -49,7 +52,7 @@
 ///
 ///     func heistScene() -> some Scene {
 ///         let heistModel = HeistModel(
-///             getAwayService: .getAwayService(in: serviceContext),
+///             getawayService: .getawayService(in: serviceContext),
 ///             shootOutService: .shootOutService(in: serviceContext)
 ///         )
 ///
@@ -79,7 +82,7 @@ public struct Service<Input, Output> {
 
 extension Service {
 
-    /// Build a service by providing an async function that implements it.
+    /// Build a service by providing an `async` implementation.
     ///
     /// - Parameter implementation: The function implementing the service.
     ///

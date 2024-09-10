@@ -1,13 +1,31 @@
-Thanks for taking a look. So you know, Service is currently work in progress. The code seems pretty much there but the documentation is being worked on.
+Thanks for taking a look. 
+
+Service is a work in progress. The code seems fairly sound. The documentation isn't.
+
 
 # What even is this?
 
-Service is an teeny, tiny, hardly worth it library with a generic type `Service<Intput, Output>` that is really just a "Named Type" wrapper around an `async` function.
+Service is an tiny library with a generic type `Service<Intput, Output>` that is hardly more than a "Named Type" wrapper around an `async` 
+function. You might want to look at it if you are making various HTTP calls in your application, although it is not limited to HTTP as a
+transport. 
 
-Why am I wasting your time with it?! 
+A quick gist is **Service provides a pattern to help you organise very valuable chunks of your code in a highly reusable and testable way.** 
+That's the sales pitch.
 
-The quick gist is **Service provides a pattern to help you organise very valuable chunks of your code in a highly reusable and testable way.** That's the sales pitch. I try to justify that in more depth [separately](/README2.md).
 
+# What does Service Achieve?
+
+Service makes it easy to:
+* For a Unit that uses an HTTP service you can **build** and **test** it using only in the Unit's domain – you don't need to worry about
+HTTP level concepts (though you can certainly expose them if they are salient for that unit).
+* Build and test Units just by defining a **type**, before service implementations are finalised (either on the backend or locally).
+* Test Services' HTTTP level implementations without use of a real network and without the use of units that depend on them.
+* Integrate your units in an application, injecting them with real services.
+* Switching Service implementations between different backend environments for staging and production, or different regions or brands.
+* Replace the services of an integrated application with mocks using stubbed scenarios, or previously obtained requests.
+* Make changes across all Service implementations such as logging or headers.
+* Support **independent** evolution of backend service implementations and units consuming them.
+  
 
 # How do I use Service?
 
@@ -31,7 +49,7 @@ In this example, the service `Output` is a Swift `Result` with a generic `Error`
 
 Even before `VehicleTaxService` has an implementation, we can **implement and test** units that consume it.
 
-```swift
+```
 import VehicleTax
 
 final class VehicleTaxModel: ObservableObject {
@@ -53,7 +71,7 @@ The "VehicleTax" team have finished working out the network API and request / re
 
 A service implementation is provided like this. **You are strongly encouraged to follow this pattern**. Add a factory function as a `static func` as an `extension` of your `Service`'s named type. The factory function should build the implementation from a passed in `ServiceContext`. 
 
-NB: The details of **your** `ServiceContext` and how your factory functions work could be very different. But here is an example:
+NB: The details of your `ServiceContext` and how your factory functions work can be very different. This is an example. 
 
 ```swift
 public extension VehicleTaxService {
@@ -76,10 +94,9 @@ public extension VehicleTaxService {
 }
 ``` 
 
-
 ### What is `ServiceContext`?
 
-`ServiceContext` is a protocol you define. It encapsulates the common details your service creation functions need. Exactly what the protocol provides is determined by the way your modules perform requests.
+`ServiceContext` is a protocol you will define. It encapsulates the common details your service creation functions need. Exactly what the protocol provides is determined by the way your modules perform requests.
 
 `ServiceContext` might frequently provide:
 
@@ -102,7 +119,6 @@ It is important that `ServiceContext` is a protocol and not a fixed type. `.vehi
 * A mock `ServiceContext` lets us exhaustively test the `.vehicleService` implementation without the actual network API existing yet.
 * A stubbing `ServiceContext` lets us point all services at potted local response data. This supports easy testing of the integrated system without hitting a real API (or the API existing yet). 
 * Finally, once network API environments are available, we can pass in a "real" `ServiceContext` and build real network services pointing at the different environments.
-
 
 ### Integrate `Service`s
 
